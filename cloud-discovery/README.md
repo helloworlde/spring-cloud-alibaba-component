@@ -1,6 +1,6 @@
 # Spring Cloud 使用 Nacos 作为服务注册中心
 
-> 使用 Nacos 作为服务的注册中心，作为配置中心的相关设置部分可以参考 [Spring Cloud 使用 Nacos 作为配置中心]()
+> 使用 Nacos 作为服务的注册中心，作为配置中心的相关设置部分可以参考 [Spring Cloud 使用 Nacos 作为配置中心](https://github.com/helloworlde/spring-cloud-alibaba-component/tree/master/cloud-config)
 
 两个应用，Consumer 向 Provider 发起请求，完成后返回给 Consumer
 
