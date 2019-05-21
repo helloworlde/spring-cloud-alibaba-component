@@ -1,0 +1,49 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+    }
+}
+
+subprojects {
+    buildscript {
+        ext {
+            springBootVersion = '2.1.5.RELEASE'
+        }
+        repositories {
+            mavenCentral()
+            maven { url 'https://repo.spring.io/milestone' }
+            maven { url 'https://repo.spring.io/snapshot' }
+        }
+        dependencies {
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        }
+    }
+
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    apply plugin: 'java'
+
+    group = 'io.github.hellworlde'
+    version = '0.0.1-SNAPSHOT'
+
+    sourceCompatibility = '1.8'
+    
+    repositories {
+        mavenLocal()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://repo.spring.io/libs-milestone' }
+        maven { url 'https://repo.spring.io/libs-snapshot' }
+
+        mavenCentral()
+    }
+
+    dependencies {
+        compile fileTree(includes: ['*.jar'], dir: 'libs')
+    }
+
+}
