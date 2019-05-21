@@ -16,7 +16,7 @@ message.prefix=Hello Nacos:
 
 ![Provider 配置](../images/nacos-cloud-provider-config.png)
 
-##添加应用
+## 添加应用
 
 ### Provider 
 
