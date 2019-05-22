@@ -1,4 +1,4 @@
-package io.github.hellworlde.config.controller;
+package io.github.helloworlde.config.controller;
 
 import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.alibaba.nacos.spring.context.annotation.config.NacosPropertySource;

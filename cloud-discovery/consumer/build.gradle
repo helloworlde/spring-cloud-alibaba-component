@@ -5,7 +5,7 @@ plugins {
 
 apply plugin: 'io.spring.dependency-management'
 
-group = 'io.github.hellworlde'
+group = 'io.github.helloworlde'
 archivesBaseName = 'consumer'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'

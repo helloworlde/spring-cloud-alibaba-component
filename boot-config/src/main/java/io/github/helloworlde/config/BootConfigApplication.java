@@ -1,4 +1,4 @@
-package io.github.hellworlde.config;
+package io.github.helloworlde.config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,9 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author HelloWood
  */
 @SpringBootApplication
-public class CloudConfigApplication {
+public class BootConfigApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CloudConfigApplication.class, args);
+        SpringApplication.run(BootConfigApplication.class, args);
     }
 }

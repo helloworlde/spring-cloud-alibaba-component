@@ -1,4 +1,4 @@
-package io.github.hellworlde.alibaba;
+package io.github.helloworlde.config;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class CloudConfigApplicationTests {
+public class BootConfigApplicationTests {
 
     @Test
     public void contextLoads() {

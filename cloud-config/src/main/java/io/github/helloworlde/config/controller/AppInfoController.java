@@ -1,4 +1,4 @@
-package io.github.hellworlde.config.controller;
+package io.github.helloworlde.config.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
