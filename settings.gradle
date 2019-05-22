@@ -9,3 +9,5 @@ include('boot-config')
 include('cloud-config')
 include('cloud-discovery/consumer')
 include('cloud-discovery/provider')
+
+include('sentinel-nacos-config')

@@ -28,3 +28,13 @@ cd spring-cloud-alibaba-component/
 |[Spring Boot 使用 Nacos 作为配置中心](./boot-config/README.md)|Spring Boot 中使用 Nacos 作为配置中心|
 |[Spring Cloud 使用 Nacos 作为配置中心](./cloud-config/README.md)|Spring Cloud 中使用 Nacos 作为配置中心|
 |[Spring Cloud 使用 Nacos 作为服务注册中心](./cloud-discovery/README.md)|Spring Cloud 中使用 Nacos 作为配置中心和服务注册中心|
+
+## Sentinel 
+
+> Sentinel 是一个流量控制框架，支持流量控制，熔断降级，系统负载保护，类似 Hystrix、resilience4j
+
+### 模块 
+
+|模块 | 特性|
+|:---|:---|
+|[Spring Cloud 使用 Sentinel 作为限流降级工具](./sentinel-nacos-config/README.md)|Spring Cloud 使用 Sentinel 作为限流降级工具，使用 Nacos 作为配置中心|
