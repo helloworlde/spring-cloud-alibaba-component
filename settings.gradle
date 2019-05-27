@@ -11,3 +11,4 @@ include('cloud-discovery/consumer')
 include('cloud-discovery/provider')
 
 include('sentinel-nacos-config')
+include('cloud-oss')

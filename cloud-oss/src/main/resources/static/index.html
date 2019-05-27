@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Alibaba Cloud OSS</title>
+</head>
+<body>
+<br>
+<h3>上传文件</h3>
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="fileName">
+    <input type="submit" value="上传">
+</form>
+
+<hr>
+<h3>下载文件</h3>
+<form action="/download" method="get">
+    <input type="text" name="fileName">
+    <input type="submit" value="下载">
+</form>
+</body>
+</html>
+<script type="text/javascript">
+    window.onload = function () {
+        if (window.location.href.split('message=')[1] !== undefined) {
+            alert("上传成功");
+        }
+    }
+</script>
