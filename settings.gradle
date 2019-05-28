@@ -12,3 +12,7 @@ include('cloud-discovery/provider')
 
 include('sentinel-nacos-config')
 include('cloud-oss')
+
+include('cloud-seata/pay-service')
+include('cloud-seata/order-service')
+include('cloud-seata/storage-service')
