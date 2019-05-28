@@ -17,6 +17,7 @@ configurations {
 }
 
 repositories {
+    maven { url 'https://repo.spring.io/snapshot/' }
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     mavenCentral()
 }
@@ -24,7 +25,7 @@ repositories {
 
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.2.2.RELEASE'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
 }
 
 dependencyManagement {
@@ -41,11 +42,12 @@ dependencies {
 
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
+    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata')
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
     runtime("mysql:mysql-connector-java")
-    
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

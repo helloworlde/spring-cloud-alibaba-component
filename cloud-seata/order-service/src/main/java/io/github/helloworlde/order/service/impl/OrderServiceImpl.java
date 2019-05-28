@@ -8,6 +8,8 @@ import io.github.helloworlde.order.dao.OrderDao;
 import io.github.helloworlde.order.model.Order;
 import io.github.helloworlde.order.model.OrderStatus;
 import io.github.helloworlde.order.service.OrderService;
+import io.seata.core.context.RootContext;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final String STORAGE_SERVICE_HOST = "http://storage-service/storage";
     private final String PAY_SERVICE_HOST = "http://pay-service/pay";
 
+    @GlobalTransactional(timeoutMills = 300000, name = "spring-cloud-demo-tx")
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
@@ -45,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
         Integer saveOrderRecord = orderDao.saveOrder(order);
         log.info("保存订单{}", saveOrderRecord > 0 ? "成功" : "失败");
-
+        log.info("当前 XID: {}", RootContext.getXID());
         // 扣减库存
         log.info("开始扣减库存");
         ReduceStockRequestVO reduceStockRequestVO = ReduceStockRequestVO.builder()

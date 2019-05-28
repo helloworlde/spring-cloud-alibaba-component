@@ -4,6 +4,7 @@ import io.github.helloworlde.common.OperationResponse;
 import io.github.helloworlde.common.pay.ReduceBalanceRequestVO;
 import io.github.helloworlde.pay.dao.AccountDao;
 import io.github.helloworlde.pay.service.PayService;
+import io.seata.core.context.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public OperationResponse reduceBalance(ReduceBalanceRequestVO reduceBalanceRequestVO) throws Exception {
+
+        log.info("当前 XID: {}", RootContext.getXID());
 
         checkBalance(reduceBalanceRequestVO.getUserId(), reduceBalanceRequestVO.getPrice());
 

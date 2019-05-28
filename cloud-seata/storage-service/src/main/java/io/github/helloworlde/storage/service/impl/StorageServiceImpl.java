@@ -4,6 +4,7 @@ import io.github.helloworlde.common.OperationResponse;
 import io.github.helloworlde.common.storage.ReduceStockRequestVO;
 import io.github.helloworlde.storage.dao.ProductDao;
 import io.github.helloworlde.storage.service.StorageService;
+import io.seata.core.context.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public OperationResponse reduceStock(ReduceStockRequestVO reduceStockRequestVO) throws Exception {
+        log.info("当前 XID: {}", RootContext.getXID());
 
         // 检查库存
         checkStock(reduceStockRequestVO.getProductId(), reduceStockRequestVO.getAmount());
