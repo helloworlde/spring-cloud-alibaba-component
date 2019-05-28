@@ -330,7 +330,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 ##### DataSource 配置
 
-这里是尤其需要注意的，Seata 目前只支持 Druid 数据源，SpringBoot 默认的 Hikari 暂时无法实现事务，所以 DataSource 需要配置为 Druid
+这里是尤其需要注意的，Seata 目前只支持 [Druid](https://github.com/alibaba/druid) 数据源，SpringBoot 默认的 Hikari 暂时不支持
 
 ```java
 import com.alibaba.druid.pool.DruidDataSource;
@@ -341,9 +341,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @author HelloWood
- */
 @Configuration
 public class DatabaseConfig {
 
@@ -383,7 +380,7 @@ public class RestTemplateConfig {
 }
 ```
 
-- 下单接口
+- OrderController
 
 ```java
 @RestController
