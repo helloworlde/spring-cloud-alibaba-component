@@ -33,11 +33,11 @@ public class OrderServiceImpl implements OrderService {
     private final String STORAGE_SERVICE_HOST = "http://storage-service/storage";
     private final String PAY_SERVICE_HOST = "http://pay-service/pay";
 
-    @GlobalTransactional(timeoutMills = 300000, name = "spring-cloud-demo-tx")
+    @GlobalTransactional
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
-        BigDecimal price = BigDecimal.ONE;
+        BigDecimal price = BigDecimal.valueOf(placeOrderRequestVO.getPrice());
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())

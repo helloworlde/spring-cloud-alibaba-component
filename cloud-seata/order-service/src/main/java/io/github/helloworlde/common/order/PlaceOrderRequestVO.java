@@ -18,4 +18,6 @@ public class PlaceOrderRequestVO {
     private Long userId;
 
     private Long productId;
+
+    private Double price;
 }
