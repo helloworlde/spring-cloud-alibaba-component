@@ -76,7 +76,7 @@ docker run --name nacos -p 8848:8848 -e MODE=standalone nacos/nacos-server
 在 [Seata Release](https://github.com/seata/seata/releases) 下载最新版的 Seata Server，解压后执行以下命令启动，这里使用 file 配置
 
 ```bash
-sh seata-server.sh 8091 file
+sh ./bin/seata-server.sh 8091 file
 ```
 
 ## 应用 
@@ -328,35 +328,28 @@ spring.datasource.password=123456
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
-##### DataSource 配置
+##### DataSourceProxy 配置
 
-这里是尤其需要注意的，Seata 目前只支持 [Druid](https://github.com/alibaba/druid) 数据源，SpringBoot 默认的 Hikari 暂时不支持
+这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，否则事务不会回滚，无法实现分布式事务 
 
 ```java
-import com.alibaba.druid.pool.DruidDataSource;
-import io.seata.rm.datasource.DataSourceProxy;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 @Configuration
-public class DatabaseConfig {
+@Import(DataSourceAutoConfiguration.class)
+public class DataSourceProxyConfig {
 
-    @Bean(destroyMethod = "close", initMethod = "init")
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DruidDataSource druidDataSource() {
-        return new DruidDataSource();
+    private DataSource dataSource;
+
+    public DataSourceProxyConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Bean
-    public DataSourceProxy dataSourceProxy(DruidDataSource druidDataSource) {
-        return new DataSourceProxy(druidDataSource);
+    public DataSourceProxy dataSourceProxy() {
+        return new DataSourceProxy(dataSource);
     }
 
     @Bean
-    public SqlSessionFactory sqlSessionFactory(DataSourceProxy dataSourceProxy) throws Exception {
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSourceProxy);
         return sqlSessionFactoryBean.getObject();
