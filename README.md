@@ -24,4 +24,54 @@
 
 > Seata 是一个分布式事务框架，可以通过 Seata 框架的注解实现非侵入性的分布式事务
 
-- [Spring Cloud 使用 Seata 实现分布式事务](./cloud-seata/README.md)
+- [Spring Cloud 使用 Seata 实现分布式事务 - MyBatis](./cloud-seata/README.md)
+- [Spring Cloud 使用 Seata 实现分布式事务 - JPA](./cloud-seata-jpa/README.md)
+
+MyBatis 和 JPA 通过 Seata 实现分布式事务都需要注入 `io.seata.rm.datasource.DataSourceProxy`, 不同的是，MyBatis 还需要额外注入 `org.apache.ibatis.session.SqlSessionFactory`
+
+MyBatis
+
+```java
+@Configuration
+public class DataSourceProxyConfig {
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public DataSource dataSource() {
+        return new DruidDataSource();
+    }
+
+    @Bean
+    public DataSourceProxy dataSourceProxy(DataSource dataSource) {
+        return new DataSourceProxy(dataSource);
+    }
+
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
+        return sqlSessionFactoryBean.getObject();
+    }
+}
+```
+
+JPA 
+
+```java
+@Configuration
+public class DataSourceProxyConfig {
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public DruidDataSource druidDataSource() {
+        return new DruidDataSource();
+    }
+
+    @Primary
+    @Bean
+    public DataSourceProxy dataSource(DruidDataSource druidDataSource) {
+        return new DataSourceProxy(druidDataSource);
+    }
+
+}
+```

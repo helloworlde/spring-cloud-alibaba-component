@@ -1,6 +1,6 @@
-# Spring Cloud 使用 Seata 实现分布式事务 - MyBatis
+# Spring Cloud 使用 Seata 实现分布式事务 - JPA
 
-> 使用 Seata 作为分布式事务组件，配置中心和注册中心使用 Nacos，使用 MySQL 数据库
+> 使用 Seata 作为分布式事务组件，配置中心和注册中心使用 Nacos，使用 MySQL 数据库，使用 JPA 作为数据访问层
 
 ## 环境准备
 
@@ -100,6 +100,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'io.github.helloworlde'
+archivesBaseName = 'jpa-storage-service'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
@@ -110,8 +111,8 @@ configurations {
 }
 
 repositories {
-    maven { url 'https://repo.spring.io/snapshot/' }
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'https://repo.spring.io/snapshot/' }
     mavenCentral()
 }
 
@@ -131,11 +132,16 @@ dependencyManagement {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Seata 0.5.2 版本有一些 bug，使用最新的 0.6.1  
+    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata') {
+        exclude group: 'io.seata', module: 'seata-spring'
+    }
+    compile('io.seata:seata-all:0.6.1')
 
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata')
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -330,7 +336,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 ##### DataSourceProxy 配置
 
-这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，否则事务不会回滚，无法实现分布式事务 
+这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，且是 `@Primary`默认的数据源，否则事务不会回滚，无法实现分布式事务 
 
 ```java
 @Configuration
@@ -338,23 +344,18 @@ public class DataSourceProxyConfig {
 
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource dataSource() {
+    public DruidDataSource druidDataSource() {
         return new DruidDataSource();
     }
 
+    @Primary
     @Bean
-    public DataSourceProxy dataSourceProxy(DataSource dataSource) {
-        return new DataSourceProxy(dataSource);
-    }
-
-    @Bean
-    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
-        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
-        return sqlSessionFactoryBean.getObject();
+    public DataSourceProxy dataSource(DruidDataSource druidDataSource) {
+        return new DataSourceProxy(druidDataSource);
     }
 }
 ```
+
 
 如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
 
