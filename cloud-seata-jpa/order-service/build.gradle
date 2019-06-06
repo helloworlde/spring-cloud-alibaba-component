@@ -1,0 +1,58 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'io.github.helloworlde'
+archivesBaseName = 'order-service'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven { url 'https://repo.spring.io/snapshot/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    mavenCentral()
+}
+
+
+ext {
+    springCloudVersion = 'Greenwich.SR1'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Seata 0.5.2 版本有一些 bug，使用 0.6.1
+    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata') {
+        exclude group: 'io.seata', module: 'seata-spring'
+    }
+    compile('io.seata:seata-all:0.6.1')
+    
+    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
+    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata')
+    
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    runtime("mysql:mysql-connector-java")
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

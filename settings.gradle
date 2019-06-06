@@ -16,3 +16,7 @@ include('cloud-oss')
 include('cloud-seata/pay-service')
 include('cloud-seata/order-service')
 include('cloud-seata/storage-service')
+
+include('cloud-seata-jpa/pay-service')
+include('cloud-seata-jpa/order-service')
+include('cloud-seata-jpa/storage-service')
