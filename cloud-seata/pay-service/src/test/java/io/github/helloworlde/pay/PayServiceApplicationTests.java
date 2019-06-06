@@ -1,4 +1,4 @@
-package io.github.helloworlde.consumer;
+package io.github.helloworlde.pay;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class OrderServiceApplicationTests {
+public class PayServiceApplicationTests {
 
     @Test
     public void contextLoads() {
