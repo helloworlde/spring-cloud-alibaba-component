@@ -34,7 +34,7 @@ spring.application.version=dev-APP_INFO-0.0.3
 ```gradle
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.2.2.RELEASE'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
 }
 
 dependencyManagement {

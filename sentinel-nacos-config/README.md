@@ -31,7 +31,7 @@ java -jar sentinel-dashboard-1.6.0.jar --server.port=8088
 ```groovy
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.2.2.RELEASE'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
 }
 
 dependencyManagement {
@@ -148,7 +148,7 @@ Blocked by Sentinel (flow limiting)%
 ```groovy
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.2.2.RELEASE'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
 }
 
 dependencyManagement {

@@ -18,13 +18,14 @@ configurations {
 
 repositories {
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'https://repo.spring.io/snapshot/' }
     mavenCentral()
 }
 
 
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.2.2.RELEASE'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
 }
 
 dependencyManagement {

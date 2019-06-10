@@ -75,3 +75,15 @@ public class DataSourceProxyConfig {
 
 }
 ```
+
+------------------
+
+## 版本说明 
+
+相关的 Spring Boot, Spring Cloud 以及 Spring Cloud Alibaba 之间的对应关系可以参考 [版本说明](https://github.com/spring-cloud-incubator/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
+
+| 组件 | 版本 | 说明|
+|:----|:-----|:----|
+|Spring Boot |2.1.5.RELEASE|
+|Spring Cloud |Greenwich.SR1|
+|Spring Cloud Alibaba |0.9.1.BUILD-SNAPSHOT| 

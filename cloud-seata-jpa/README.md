@@ -100,7 +100,6 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'io.github.helloworlde'
-archivesBaseName = 'jpa-storage-service'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
@@ -307,7 +306,7 @@ config {
 
 ##### 配置 bootstrap.properties
 
-```
+```properties
 spring.application.name=order-service
 # Config
 spring.cloud.nacos.config.server-addr=127.0.0.1:8848
@@ -324,7 +323,7 @@ spring.cloud.nacos.discovery.namespace=public
 
 ##### application.properties
 
-```
+```properties
 server.port=8081
 management.endpoints.web.exposure.exclude=*
 # MySQL
