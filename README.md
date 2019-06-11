@@ -24,7 +24,7 @@
 
 > Seata 是一个分布式事务框架，可以通过 Seata 框架的注解实现非侵入性的分布式事务
 
-- [Spring Cloud 使用 Seata 实现分布式事务 - MyBatis](./cloud-seata/README.md)
+- [Spring Cloud 使用 Seata 实现分布式事务 - MyBatis](./cloud-seata-mybatis/README.md)
 - [Spring Cloud 使用 Seata 实现分布式事务 - JPA](./cloud-seata-jpa/README.md)
 
 MyBatis 和 JPA 通过 Seata 实现分布式事务都需要注入 `io.seata.rm.datasource.DataSourceProxy`, 不同的是，MyBatis 还需要额外注入 `org.apache.ibatis.session.SqlSessionFactory`

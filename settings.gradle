@@ -13,9 +13,9 @@ include('cloud-discovery/provider')
 include('sentinel-nacos-config')
 include('cloud-oss')
 
-include('cloud-seata/pay-service')
-include('cloud-seata/order-service')
-include('cloud-seata/storage-service')
+include('cloud-seata-mybatis/pay-service')
+include('cloud-seata-mybatis/order-service')
+include('cloud-seata-mybatis/storage-service')
 
 include('cloud-seata-jpa/pay-service')
 include('cloud-seata-jpa/order-service')
