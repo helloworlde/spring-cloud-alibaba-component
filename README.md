@@ -26,6 +26,7 @@
 
 - [Spring Cloud 使用 Seata 实现分布式事务 - MyBatis](./cloud-seata-mybatis/README.md)
 - [Spring Cloud 使用 Seata 实现分布式事务 - JPA](./cloud-seata-jpa/README.md)
+- [Spring Cloud 使用 Seata 实现分布式事务 - Mybatis - Nacos 作为 Seata 配置中心](./cloud-seata-nacos/README.md)
 
 MyBatis 和 JPA 通过 Seata 实现分布式事务都需要注入 `io.seata.rm.datasource.DataSourceProxy`, 不同的是，MyBatis 还需要额外注入 `org.apache.ibatis.session.SqlSessionFactory`
 
@@ -84,6 +85,7 @@ public class DataSourceProxyConfig {
 
 | 组件 | 版本 | 说明|
 |:----|:-----|:----|
-|Spring Boot |2.1.5.RELEASE|
-|Spring Cloud |Greenwich.SR1|
-|Spring Cloud Alibaba |0.9.1.BUILD-SNAPSHOT| 
+|Spring Boot |2.1.5.RELEASE||
+|Spring Cloud |Greenwich.SR1||
+|Spring Cloud Alibaba |0.9.1.BUILD-SNAPSHOT|| 
+|Seata |0.6.1|`org.springframework.cloud:spring-cloud-starter-alibaba-seata:0.9.1.BUILD-SNAPSHOT` 中的 0.5.2 中有一些问题，所以单独使用Seata 0.6.1|
