@@ -16,14 +16,14 @@ USE seata;
 CREATE TABLE account
 (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    balance          DOUBLE,
+    balance          DECIMAL,
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
 );
 
 CREATE TABLE product
 (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    price            DOUBLE,
+    price            DECIMAL,
     stock            INT,
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
 );
@@ -33,7 +33,7 @@ CREATE TABLE orders
     id               INT AUTO_INCREMENT PRIMARY KEY,
     user_id          INT,
     product_id       INT,
-    pay_amount       DOUBLE,
+    pay_amount       DECIMAL,
     status           VARCHAR(100),
     add_time         DATETIME DEFAULT now(),
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
@@ -429,7 +429,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
-        BigDecimal price = BigDecimal.valueOf(placeOrderRequestVO.getPrice());
+        BigDecimal price = placeOrderRequestVO.getPrice();
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())

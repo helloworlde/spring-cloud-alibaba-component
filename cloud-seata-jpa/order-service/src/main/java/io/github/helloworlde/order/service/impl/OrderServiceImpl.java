@@ -37,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
-        BigDecimal price = BigDecimal.valueOf(placeOrderRequestVO.getPrice());
+        BigDecimal price = placeOrderRequestVO.getPrice();
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())
