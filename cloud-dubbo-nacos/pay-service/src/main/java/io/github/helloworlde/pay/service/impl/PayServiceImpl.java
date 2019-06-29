@@ -15,7 +15,6 @@ import java.math.BigDecimal;
  */
 @Service(protocol = "dubbo")
 @Slf4j
-@org.springframework.stereotype.Service
 public class PayServiceImpl implements PayService {
 
     @Autowired
