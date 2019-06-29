@@ -24,3 +24,8 @@ include('cloud-seata-jpa/storage-service')
 include('cloud-seata-nacos/pay-service')
 include('cloud-seata-nacos/order-service')
 include('cloud-seata-nacos/storage-service')
+
+include('cloud-dubbo-nacos/dubbo-base')
+include('cloud-dubbo-nacos/pay-service')
+include('cloud-dubbo-nacos/order-service')
+include('cloud-dubbo-nacos/storage-service')
