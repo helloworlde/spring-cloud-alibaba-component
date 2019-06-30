@@ -20,6 +20,12 @@
 
 - [Spring Cloud 使用阿里云 OSS](./cloud-oss/README.md)
 
+## Dubbo
+
+> Dubbo 是一个远程调用框架，用于实现方法的远程调用
+
+- [Spring Cloud 使用 Dubbo 实现远程调用，Nacos 作为注册中心](./cloud-dubbo-nacos/README.md)
+
 ## Seata 
 
 > Seata 是一个分布式事务框架，可以通过 Seata 框架的注解实现非侵入性的分布式事务
