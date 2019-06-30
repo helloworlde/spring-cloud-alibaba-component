@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 /**
  * @author HelloWood
  */
-@Service(protocol = "dubbo")
+@Service
 @Slf4j
 public class PayServiceImpl implements PayService {
 

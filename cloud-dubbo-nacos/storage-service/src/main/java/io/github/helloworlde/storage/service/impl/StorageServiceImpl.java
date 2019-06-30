@@ -11,9 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * @author HelloWood
  */
-@Service(protocol = "dubbo")
+@Service
 @Slf4j
-@org.springframework.stereotype.Service
 public class StorageServiceImpl implements StorageService {
 
     @Autowired

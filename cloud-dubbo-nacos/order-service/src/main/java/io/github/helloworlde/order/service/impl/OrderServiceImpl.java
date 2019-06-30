@@ -15,7 +15,6 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 
@@ -27,9 +26,6 @@ import java.math.BigDecimal;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private OrderDao orderDao;
 
     @Reference
@@ -37,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private PayService payService;
 
     @Reference
+    @Lazy
     private StorageService storageService;
 
 
