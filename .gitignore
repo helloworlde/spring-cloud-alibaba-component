@@ -33,3 +33,4 @@ HELP.md
 *.class
 */out/*
 */build/*
+*/*/build/*
