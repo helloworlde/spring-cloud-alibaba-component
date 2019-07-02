@@ -70,6 +70,7 @@ public class DataSourceProxyConfig {
 
 <details>
 <summary>JPA</summary>
+
 ```java
 @Configuration
 public class DataSourceProxyConfig {
@@ -88,6 +89,7 @@ public class DataSourceProxyConfig {
 
 }
 ```
+
 </details>
 
 ------------------
