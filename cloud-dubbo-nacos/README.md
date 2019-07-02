@@ -345,3 +345,21 @@ dubbo.protocol.port=-1
 dubbo.protocols.dubbo.name=dubbo
 dubbo.protocols.dubbo.port=-1
 ```
+
+-  Fail to start qos server: , dubbo version: 2.7.1, current host: 172.16.81.91
+
+启动的过程中抛出`java.net.BindException: Address already in use`，提示`Fail to start qos server: , dubbo version: 2.7.1, current host: 172.16.81.91`
+
+这是因为已经启动的应用占用了 qos 服务的 22222 端口，虽然中有 qos 相关的配置，但是并不会起作用，需要在JVM的启动参数中添加 `-Ddubbo.application.qos.enable=false -Ddubbo.application.qos.accept.foreign.ip=false`
+
+```
+2019-07-02 15:30:33.122  WARN 10613 --- [           main] o.a.d.qos.protocol.QosProtocolWrapper    :  [DUBBO] Fail to start qos server: , dubbo version: 2.7.1, current host: 172.16.81.91
+
+java.net.BindException: Address already in use
+	at sun.nio.ch.Net.bind0(Native Method) ~[na:1.8.0_172]
+	at sun.nio.ch.Net.bind(Net.java:433) ~[na:1.8.0_172]
+	at sun.nio.ch.Net.bind(Net.java:425) ~[na:1.8.0_172]
+	...
+```
+
+关于 qos 的配置可以参考 [新版本 telnet 命令使用说明](http://dubbo.apache.org/zh-cn/docs/user/references/qos.html)
