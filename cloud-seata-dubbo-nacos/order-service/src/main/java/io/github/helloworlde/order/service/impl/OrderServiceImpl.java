@@ -10,6 +10,7 @@ import io.github.helloworlde.pay.model.ReduceBalanceRequestVO;
 import io.github.helloworlde.pay.service.PayService;
 import io.github.helloworlde.storage.model.ReduceStockRequestVO;
 import io.github.helloworlde.storage.service.StorageService;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
@@ -37,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private StorageService storageService;
 
 
+    @GlobalTransactional
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) throws Exception {
         Integer amount = 1;
