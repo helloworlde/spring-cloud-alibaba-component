@@ -29,3 +29,7 @@ include('cloud-dubbo-nacos/dubbo-base')
 include('cloud-dubbo-nacos/pay-service')
 include('cloud-dubbo-nacos/order-service')
 include('cloud-dubbo-nacos/storage-service')
+
+include('cloud-dubbo-zk/dubbo-base')
+include('cloud-dubbo-zk/provider')
+include('cloud-dubbo-zk/consumer')

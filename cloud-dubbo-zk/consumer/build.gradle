@@ -1,0 +1,48 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+archivesBaseName = 'consumer'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven { url 'https://repo.spring.io/snapshot/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    mavenCentral()
+}
+
+
+ext {
+    springCloudVersion = 'Greenwich.SR1'
+    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+    }
+}
+
+dependencies {
+    compile project(':cloud-dubbo-nacos/dubbo-base')
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    compile('org.springframework.cloud:spring-cloud-starter-dubbo')
+    compile('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery')
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

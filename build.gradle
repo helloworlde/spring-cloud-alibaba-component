@@ -32,7 +32,7 @@ subprojects {
     version = '0.0.1-SNAPSHOT'
 
     sourceCompatibility = '1.8'
-    
+
     repositories {
         mavenLocal()
         maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
@@ -46,4 +46,9 @@ subprojects {
         compile fileTree(includes: ['*.jar'], dir: 'libs')
     }
 
+    task removeBuild << {
+        println("Remove out&build:" + buildDir.parentFile.absolutePath)
+        delete(buildDir.absolutePath)
+        delete(buildDir.parentFile.absolutePath + "/out")
+    }
 }
