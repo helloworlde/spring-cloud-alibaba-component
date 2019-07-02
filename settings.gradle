@@ -33,3 +33,8 @@ include('cloud-dubbo-nacos/storage-service')
 include('cloud-dubbo-zk/dubbo-base')
 include('cloud-dubbo-zk/provider')
 include('cloud-dubbo-zk/consumer')
+
+include('cloud-seata-dubbo-nacos/dubbo-base')
+include('cloud-seata-dubbo-nacos/pay-service')
+include('cloud-seata-dubbo-nacos/order-service')
+include('cloud-seata-dubbo-nacos/storage-service')

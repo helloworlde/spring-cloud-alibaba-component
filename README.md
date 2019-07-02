@@ -104,3 +104,4 @@ public class DataSourceProxyConfig {
 |Spring Cloud |Greenwich.SR1||
 |Spring Cloud Alibaba |0.9.1.BUILD-SNAPSHOT|| 
 |Seata |0.6.1|`org.springframework.cloud:spring-cloud-starter-alibaba-seata:0.9.1.BUILD-SNAPSHOT` 中的 0.5.2 中有一些问题，所以单独使用Seata 0.6.1|
+|Dubbo |2.7.1||
