@@ -24,7 +24,10 @@
 
 > Dubbo 是一个远程调用框架，用于实现方法的远程调用
 
+推荐使用 ZooKeeper 作为注册中心，当前使用 Nacos 会有各种问题
+
 - [Spring Cloud 使用 Dubbo 实现远程调用，Nacos 作为注册中心](./cloud-dubbo-nacos/README.md)
+- [Spring Cloud 使用 Dubbo 实现远程调用，ZooKeeper 作为注册中心](./cloud-dubbo-zk/README.md)
 
 ## Seata 
 
@@ -36,7 +39,8 @@
 
 MyBatis 和 JPA 通过 Seata 实现分布式事务都需要注入 `io.seata.rm.datasource.DataSourceProxy`, 不同的是，MyBatis 还需要额外注入 `org.apache.ibatis.session.SqlSessionFactory`
 
-MyBatis
+<details>
+<summary>MyBatis</summary>
 
 ```java
 @Configuration
@@ -61,9 +65,11 @@ public class DataSourceProxyConfig {
     }
 }
 ```
+</details>
 
-JPA 
 
+<details>
+<summary>JPA</summary>
 ```java
 @Configuration
 public class DataSourceProxyConfig {
@@ -82,6 +88,7 @@ public class DataSourceProxyConfig {
 
 }
 ```
+</details>
 
 ------------------
 
