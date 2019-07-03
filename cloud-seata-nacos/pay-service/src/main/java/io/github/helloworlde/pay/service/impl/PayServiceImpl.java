@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-
 /**
  * @author HelloWood
  */
@@ -39,11 +37,11 @@ public class PayServiceImpl implements PayService {
 
     }
 
-    private void checkBalance(Long userId, BigDecimal price) throws Exception {
+    private void checkBalance(Long userId, Integer price) throws Exception {
         log.info("检查用户 {} 余额", userId);
-        BigDecimal balance = accountDao.getBalance(userId);
+        Integer balance = accountDao.getBalance(userId);
 
-        if (balance.compareTo(price) < 0) {
+        if (balance < price) {
             log.warn("用户 {} 余额不足，当前余额:{}", userId, balance);
             throw new Exception("余额不足");
         }

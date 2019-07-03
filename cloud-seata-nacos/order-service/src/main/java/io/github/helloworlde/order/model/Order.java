@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 /**
  * 订单
  *
@@ -26,5 +24,5 @@ public class Order {
 
     private OrderStatus status;
 
-    private BigDecimal payAmount;
+    private Integer payAmount;
 }

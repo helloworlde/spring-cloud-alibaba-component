@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 /**
  * 扣减余额请求 VO
  *
@@ -20,5 +18,5 @@ public class ReduceBalanceRequestVO {
 
     private Long userId;
 
-    private BigDecimal price;
+    private Integer price;
 }
