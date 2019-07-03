@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -21,7 +20,7 @@ public class Product {
     private Long id;
 
     @Column(name = "price")
-    private BigDecimal price;
+    private Integer price;
 
     @Column(name = "stock")
     private Integer stock;

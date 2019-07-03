@@ -370,7 +370,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
-        BigDecimal price = placeOrderRequestVO.getPrice();
+        Integer price = placeOrderRequestVO.getPrice();
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())
@@ -464,9 +464,9 @@ public class PayServiceImpl implements PayService {
 
     }
 
-    private void checkBalance(Long userId, BigDecimal price) throws Exception {
+    private void checkBalance(Long userId, Integer price) throws Exception {
         log.info("检查用户 {} 余额", userId);
-        BigDecimal balance = accountDao.getBalance(userId);
+        Integer balance = accountDao.getBalance(userId);
 
         if (balance.compareTo(price) < 0) {
             log.warn("用户 {} 余额不足，当前余额:{}", userId, balance);

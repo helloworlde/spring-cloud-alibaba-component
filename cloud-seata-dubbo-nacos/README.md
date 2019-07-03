@@ -269,7 +269,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) throws Exception {
 
-        BigDecimal price = placeOrderRequestVO.getPrice();
+        Integer price = placeOrderRequestVO.getPrice();
         // ...
         OperationResponse storageOperationResponse = storageService.reduceStock(reduceStockRequestVO);
         // ...
