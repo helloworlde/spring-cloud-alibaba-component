@@ -33,7 +33,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile project(':cloud-dubbo-nacos/dubbo-base')
+    compile project(':cloud-seata-dubbo-nacos/dubbo-base')
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'

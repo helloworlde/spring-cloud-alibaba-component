@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * 下单请求 VO
@@ -25,5 +24,5 @@ public class PlaceOrderRequestVO implements Serializable {
 
     private Long productId;
 
-    private BigDecimal price;
+    private Integer price;
 }

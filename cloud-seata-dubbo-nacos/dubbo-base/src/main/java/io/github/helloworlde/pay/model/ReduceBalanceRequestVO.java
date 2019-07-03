@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * 扣减余额请求 VO
@@ -23,5 +22,5 @@ public class ReduceBalanceRequestVO implements Serializable {
 
     private Long userId;
 
-    private BigDecimal price;
+    private Integer price;
 }

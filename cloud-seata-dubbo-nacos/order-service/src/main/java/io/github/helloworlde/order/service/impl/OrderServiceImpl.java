@@ -17,8 +17,6 @@ import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
-import java.math.BigDecimal;
-
 /**
  * @author HelloWood
  */
@@ -42,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) throws Exception {
         Integer amount = 1;
-        BigDecimal price = placeOrderRequestVO.getPrice();
+        Integer price = placeOrderRequestVO.getPrice();
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())
