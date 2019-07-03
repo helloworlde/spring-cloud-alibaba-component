@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 /**
  * 下单请求 VO
  *
@@ -21,5 +19,5 @@ public class PlaceOrderRequestVO {
 
     private Long productId;
 
-    private BigDecimal price;
+    private Integer price;
 }
