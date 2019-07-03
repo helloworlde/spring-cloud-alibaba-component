@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.math.BigDecimal;
-
 /**
  * @author HelloWood
  */
@@ -23,5 +21,5 @@ public interface AccountDao extends CrudRepository<Account, Long> {
      */
     @Modifying
     @Query("UPDATE Account SET balance = balance - :price WHERE id = :userId")
-    Integer reduceBalance(@Param("userId") Long userId, @Param("price") BigDecimal price);
+    Integer reduceBalance(@Param("userId") Long userId, @Param("price") Integer price);
 }

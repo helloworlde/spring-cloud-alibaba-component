@@ -16,14 +16,14 @@ USE seata;
 CREATE TABLE account
 (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    balance          DECIMAL,
+    balance          INT,
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
 );
 
 CREATE TABLE product
 (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    price            DECIMAL,
+    price            INT,
     stock            INT,
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
 );
@@ -33,7 +33,7 @@ CREATE TABLE orders
     id               INT AUTO_INCREMENT PRIMARY KEY,
     user_id          INT,
     product_id       INT,
-    pay_amount       DECIMAL,
+    pay_amount       INT,
     status           VARCHAR(100),
     add_time         DATETIME DEFAULT now(),
     last_update_time DATETIME DEFAULT now() ON UPDATE now()
@@ -42,7 +42,7 @@ CREATE TABLE orders
 INSERT INTO account (id, balance)
 VALUES (1, 100);
 INSERT INTO product (id, price, stock)
-VALUES (1, 5.00, 10);
+VALUES (1, 5, 10);
 ```
 
 - Seata Undo 表

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
@@ -43,12 +42,12 @@ public class PayServiceImpl implements PayService {
 
     }
 
-    private void checkBalance(Long userId, BigDecimal price) throws Exception {
+    private void checkBalance(Long userId, Integer price) throws Exception {
         log.info("检查用户 {} 余额", userId);
         Optional<Account> account = accountDao.findById(userId);
         if (account.isPresent()) {
-            BigDecimal balance = account.get().getBalance();
-            if (balance.compareTo(price) < 0) {
+            Integer balance = account.get().getBalance();
+            if (balance < price) {
                 log.warn("用户 {} 余额不足，当前余额:{}", userId, balance);
                 throw new Exception("余额不足");
             }

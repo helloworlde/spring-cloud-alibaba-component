@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
-
 /**
  * @author HelloWood
  */
@@ -37,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
         Integer amount = 1;
-        BigDecimal price = placeOrderRequestVO.getPrice();
+        Integer price = placeOrderRequestVO.getPrice();
 
         Order order = Order.builder()
                            .userId(placeOrderRequestVO.getUserId())

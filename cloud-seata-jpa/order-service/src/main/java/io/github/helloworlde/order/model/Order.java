@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 /**
  * 订单
@@ -35,5 +34,5 @@ public class Order {
     private OrderStatus status;
 
     @Column(name = "pay_amount")
-    private BigDecimal payAmount;
+    private Integer payAmount;
 }
