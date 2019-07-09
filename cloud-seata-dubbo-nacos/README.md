@@ -1,5 +1,3 @@
-@(SpringCloud)[SpringCloud, Seata, Nacos, Dubbo]
-
 # Spring Cloud 使用 Dubbo 实现远程调用，Nacos 作为注册中心，使用 Seata 实现分布式事务
 
 > 使用 Seata 作为分布式事务组件，配置中心和注册中心使用 Nacos，使用 MySQL 数据库和 MyBatis，同时使用 Nacos 作为 Seata 的配置中心，使用 Dubbo 作为 RPC 框架
