@@ -141,406 +141,6 @@ sh ./bin/seata-server.sh 8091 file
 
 启动后在 Nacos 的服务列表下面可以看到一个名为`serverAddr`的服务
 
-## 应用 
-
-有三个应用，order-service, pay-service, storage-service; order-service 的 placeOrder 接口会分别调用 pay-service 和 storage-service 的接口
-
-### 添加应用
-
-#### 应用配置
-
-以下的配置所有的项目都是类似的
-
-##### 配置依赖 build.gradle 
-
-```gradle
-plugins {
-    id 'org.springframework.boot' version '2.1.5.RELEASE'
-    id 'java'
-}
-
-apply plugin: 'io.spring.dependency-management'
-
-group = 'io.github.helloworlde'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
-repositories {
-    maven { url 'https://repo.spring.io/snapshot/' }
-    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-    mavenCentral()
-}
-
-
-ext {
-    springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        mavenBom "org.springframework.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
-    }
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
-
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
-    
-    // Seata 0.5.2 版本有一些 bug，使用 0.6.1  
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata') {
-        exclude group: 'io.seata', module: 'seata-spring'
-    }
-    compile('io.seata:seata-all:0.6.1')
-
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    runtime("mysql:mysql-connector-java")
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-```
-
-需要注意的是当前Spring Boot 和 Spring Cloud 以及 Spring Cloud Alibaba 的版本号需要互相对应，否则可能会存在各种问题；具体可以参考[版本说明](https://github.com/spring-cloud-incubator/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
-
-
-- registry.conf
-
-```
-registry {
-  type = "nacos"
-
-  nacos {
-    serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
-  }
-}
-
-config {
-  type = "nacos"
-
-  nacos {
-    serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
-  }
-}
-```
-
-##### 配置 bootstrap.properties
-
-```properties
-spring.application.name=order-service
-# Config
-spring.cloud.nacos.config.server-addr=127.0.0.1:8848
-spring.cloud.nacos.config.namespace=public
-spring.cloud.nacos.config.group=DEFAULT_GROUP
-spring.cloud.nacos.config.prefix=${spring.application.name}
-spring.cloud.nacos.config.file-extension=properties
-# Discovery
-spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
-spring.cloud.nacos.discovery.namespace=public
-```
-
-这里的 Nacos 配置使用的是本地启动的，nacos.config 的 Group, namespace 都是默认的，如果需要可以修改成自己对应的，具体可以参考[Spring Cloud 使用 Nacos 作为服务注册中心](https://github.com/helloworlde/spring-cloud-alibaba-component/blob/master/cloud-discovery/README.md)
-
-##### application.properties
-
-```properties
-server.port=8081
-management.endpoints.web.exposure.exclude=*
-# MySQL
-spring.datasource.url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
-spring.datasource.username=root
-spring.datasource.password=123456
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-```
-
-##### DataSourceProxy 配置
-
-这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，否则事务不会回滚，无法实现分布式事务 
-
-```java
-@Configuration
-public class DataSourceProxyConfig {
-
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource dataSource() {
-        return new DruidDataSource();
-    }
-
-    @Bean
-    public DataSourceProxy dataSourceProxy(DataSource dataSource) {
-        return new DataSourceProxy(dataSource);
-    }
-
-    @Bean
-    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
-        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
-        return sqlSessionFactoryBean.getObject();
-    }
-}
-```
-
-如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
-
-```properties
-spring.datasource.hikari.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.hikari.jdbc-url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
-spring.datasource.hikari.username=root
-spring.datasource.hikari.password=123456
-```
-
-```java
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.hikari")
-    public DataSource dataSource() {
-        return new HikariDataSource();
-    }
-```
-
-#### Order-Service
-
-- 配置 RestTemplate
-
-```java
-@Component
-public class RestTemplateConfig {
-
-    @LoadBalanced
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-}
-```
-
-- OrderController
-
-```java
-@RestController
-@RequestMapping("/order")
-@Slf4j
-public class OrderController {
-
-    @Autowired
-    private OrderService orderService;
-
-    @PostMapping("/placeOrder")
-    @ResponseBody
-    public OperationResponse placeOrder(@RequestBody PlaceOrderRequestVO placeOrderRequestVO) {
-        log.info("收到下单请求,用户:{}, 商品:{}", placeOrderRequestVO.getUserId(), placeOrderRequestVO.getProductId());
-        return orderService.placeOrder(placeOrderRequestVO);
-    }
-}
-```
-
-- OrderService 
-
-```java
-@Service
-@Slf4j
-public class OrderServiceImpl implements OrderService {
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private OrderDao orderDao;
-
-    private final String STORAGE_SERVICE_HOST = "http://storage-service/storage";
-    private final String PAY_SERVICE_HOST = "http://pay-service/pay";
-
-    @GlobalTransactional
-    @Override
-    public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) {
-        Integer amount = 1;
-        Integer price = placeOrderRequestVO.getPrice();
-
-        Order order = Order.builder()
-                           .userId(placeOrderRequestVO.getUserId())
-                           .productId(placeOrderRequestVO.getProductId())
-                           .status(OrderStatus.INIT)
-                           .payAmount(price)
-                           .build();
-
-        Integer saveOrderRecord = orderDao.saveOrder(order);
-        log.info("保存订单{}", saveOrderRecord > 0 ? "成功" : "失败");
-        log.info("当前 XID: {}", RootContext.getXID());
-        // 扣减库存
-        log.info("开始扣减库存");
-        ReduceStockRequestVO reduceStockRequestVO = ReduceStockRequestVO.builder()
-                                                                        .productId(placeOrderRequestVO.getProductId())
-                                                                        .amount(amount)
-                                                                        .build();
-        String storageReduceUrl = String.format("%s/reduceStock", STORAGE_SERVICE_HOST);
-        OperationResponse storageOperationResponse = restTemplate.postForObject(storageReduceUrl, reduceStockRequestVO, OperationResponse.class);
-        log.info("扣减库存结果:{}", storageOperationResponse);
-
-        // 扣减余额
-        log.info("开始扣减余额");
-        ReduceBalanceRequestVO reduceBalanceRequestVO = ReduceBalanceRequestVO.builder()
-                                                                              .userId(placeOrderRequestVO.getUserId())
-                                                                              .price(price)
-                                                                              .build();
-
-        String reduceBalanceUrl = String.format("%s/reduceBalance", PAY_SERVICE_HOST);
-        OperationResponse balanceOperationResponse = restTemplate.postForObject(reduceBalanceUrl, reduceBalanceRequestVO, OperationResponse.class);
-        log.info("扣减余额结果:{}", balanceOperationResponse);
-
-        Integer updateOrderRecord = orderDao.updateOrder(order.getId(), OrderStatus.SUCCESS);
-        log.info("更新订单:{} {}", order.getId(), updateOrderRecord > 0 ? "成功" : "失败");
-
-        return OperationResponse.builder()
-                                .success(balanceOperationResponse.isSuccess() && storageOperationResponse.isSuccess())
-                                .build();
-    }
-
-}
-```
-
-需要注意的是在方法上添加了使用分布式事务的注解 `@GlobalTransactional`
-
-#### Pay-Service
-
-- PayController
-```java
-@RestController
-@RequestMapping("/pay")
-@Slf4j
-public class PayController {
-
-    @Autowired
-    private PayService payService;
-
-    @PostMapping("/reduceBalance")
-    @ResponseBody
-    public OperationResponse reduceBalance(@RequestBody ReduceBalanceRequestVO reduceBalanceRequestVO) throws Exception {
-        return payService.reduceBalance(reduceBalanceRequestVO);
-    }
-}
-```
-
-- PayService 
-
-```java
-@Service
-@Slf4j
-public class PayServiceImpl implements PayService {
-
-    @Autowired
-    private AccountDao accountDao;
-
-    @Override
-    public OperationResponse reduceBalance(ReduceBalanceRequestVO reduceBalanceRequestVO) throws Exception {
-
-        log.info("当前 XID: {}", RootContext.getXID());
-
-        checkBalance(reduceBalanceRequestVO.getUserId(), reduceBalanceRequestVO.getPrice());
-
-        log.info("开始扣减用户 {} 余额", reduceBalanceRequestVO.getUserId());
-        Integer record = accountDao.reduceBalance(reduceBalanceRequestVO.getPrice());
-        log.info("扣减用户 {} 余额结果:{}", reduceBalanceRequestVO.getUserId(), record > 0 ? "操作成功" : "扣减余额失败");
-
-        return OperationResponse.builder()
-                                .success(record > 0)
-                                .message(record > 0 ? "操作成功" : "扣余额失败")
-                                .build();
-
-    }
-
-    private void checkBalance(Long userId, Integer price) throws Exception {
-        log.info("检查用户 {} 余额", userId);
-        Integer balance = accountDao.getBalance(userId);
-
-        if (balance.compareTo(price) < 0) {
-            log.warn("用户 {} 余额不足，当前余额:{}", userId, balance);
-            throw new Exception("余额不足");
-        }
-
-    }
-}
-```
-
-这里，当余额不足时可以抛出异常
-
-#### Storage-Service
-
-- StorageController
-
-```java
-@RestController
-@RequestMapping("/storage")
-@Slf4j
-public class StorageController {
-
-    @Autowired
-    private StorageService storageService;
-
-    @PostMapping("/reduceStock")
-    @ResponseBody
-    public OperationResponse reduceStock(@RequestBody ReduceStockRequestVO reduceStockRequestVO) throws Exception {
-        return storageService.reduceStock(reduceStockRequestVO);
-    }
-}
-```
-
-- StorageService
-
-```java
-@Service
-@Slf4j
-public class StorageServiceImpl implements StorageService {
-
-    @Autowired
-    private ProductDao productDao;
-
-    @Override
-    public OperationResponse reduceStock(ReduceStockRequestVO reduceStockRequestVO) throws Exception {
-        log.info("当前 XID: {}", RootContext.getXID());
-
-        // 检查库存
-        checkStock(reduceStockRequestVO.getProductId(), reduceStockRequestVO.getAmount());
-
-        log.info("开始扣减 {} 库存", reduceStockRequestVO.getProductId());
-        // 扣减库存
-        Integer record = productDao.reduceStock(reduceStockRequestVO.getProductId(), reduceStockRequestVO.getAmount());
-        log.info("扣减 {} 库存结果:{}", reduceStockRequestVO.getProductId(), record > 0 ? "操作成功" : "扣减库存失败");
-
-        return OperationResponse.builder()
-                                .success(record > 0)
-                                .message(record > 0 ? "操作成功" : "扣减库存失败")
-                                .build();
-
-    }
-
-    public void checkStock(Long productId, Integer requiredAmount) throws Exception {
-        log.info("检查 {} 库存", productId);
-        Integer stock = productDao.getStock(productId);
-
-        if (stock < requiredAmount) {
-            log.warn("{} 库存不足，当前库存:{}", productId, stock);
-            throw new Exception("库存不足");
-        }
-    }
-}
-```
-
 ## 测试
 
 - 启动应用
@@ -594,3 +194,56 @@ FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'seata'
   AND TABLE_NAME = 'undo_log'
 ```
+
+## 注意 
+
+### DataSourceProxy 配置
+
+这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，且是 `@Primary`默认的数据源，否则事务不会回滚，无法实现分布式事务 
+
+```java
+@Configuration
+public class DataSourceProxyConfig {
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public DruidDataSource druidDataSource() {
+        return new DruidDataSource();
+    }
+
+    @Primary
+    @Bean
+    public DataSourceProxy dataSource(DruidDataSource druidDataSource) {
+        return new DataSourceProxy(druidDataSource);
+    }
+    
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
+        return sqlSessionFactoryBean.getObject();
+    }    
+}
+```
+
+如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
+
+```properties
+spring.datasource.hikari.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.hikari.jdbc-url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
+spring.datasource.hikari.username=root
+spring.datasource.hikari.password=123456
+```
+
+```java
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
+    public DataSource dataSource() {
+        return new HikariDataSource();
+    }
+```
+
+### 版本
+
+需要注意的是当前Spring Boot 和 Spring Cloud 以及 Spring Cloud Alibaba 的版本号需要互相对应，否则可能会存在各种问题；具体可以参考[版本说明](https://github.com/spring-cloud-incubator/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
+

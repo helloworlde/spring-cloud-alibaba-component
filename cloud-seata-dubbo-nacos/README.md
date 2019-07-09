@@ -43,11 +43,7 @@ INSERT INTO account (id, balance)
 VALUES (1, 100);
 INSERT INTO product (id, price, stock)
 VALUES (1, 5, 10);
-```
 
-- Seata Undo 表
-
-```sql
 CREATE TABLE undo_log
 (
     id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
@@ -141,293 +137,6 @@ sh ./bin/seata-server.sh 8091 file
 
 启动后在 Nacos 的服务列表下面可以看到一个名为`serverAddr`的服务
 
-## 应用 
-
-有三个应用，order-service, pay-service, storage-service; order-service 的 placeOrder 接口会分别调用 pay-service 和 storage-service 的接口
-
-应用有两种角色，一种是生产者，一种是消费者；在这个 Demo 中，order-service 是消费者，pay-service 和 storage-service 是生产者
-
-### 添加应用
-
-#### 添加公共模块
-
-> Dubbo 服务接口是服务提供方与消费方的远程通讯契约，通常由普通的 Java 接口（interface）来声明
-> 为了确保契约的一致性，推荐的做法是将 Dubbo 服务接口打包在第二方或者第三方的 artifact（jar）中， 对于服务提供方而言，不仅通过依赖 artifact 的形式引入 Dubbo 服务接口，而且需要将其实现。对应的服务消费端，同样地需要依赖该 artifact， 并以接口调用的方式执行远程方法。接下来进一步讨论怎样实现 Dubbo 服务提供方和消费方。
-
-因此，添加一个公共模块用于各个应用作为依赖；将相关的接口和 Model 放在这里
-
-- build.gradle 
-
-```java
-plugins {
-    id 'java'
-}
-
-
-group = 'io.github.helloworlde'
-archivesBaseName = 'dubbo-base'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
-repositories {
-    maven { url 'https://repo.spring.io/snapshot/' }
-    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-    mavenCentral()
-}
-
-
-dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
-}
-```
-
-#### 应用配置
-
-以下的配置所有的项目都是类似的
-
-##### 配置依赖 build.gradle 
-
-```gradle
-
-dependencies {
-    compile project(':cloud-dubbo-nacos/dubbo-base')
-
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
-
-    compile('org.springframework.cloud:spring-cloud-starter-dubbo')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
- 
-    // Seata 0.5.2 版本有一些 bug，使用 0.6.1  
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata') {
-        exclude group: 'io.seata', module: 'seata-spring'
-    }
-    compile('io.seata:seata-all:0.6.1')
-    
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    runtime("mysql:mysql-connector-java")
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-```
-
-需要注意的是当前Spring Boot 和 Spring Cloud 以及 Spring Cloud Alibaba 的版本号需要互相对应，否则可能会存在各种问题；具体可以参考[版本说明](https://github.com/spring-cloud-incubator/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
-
-
-##### registry.conf
-
-```
-registry {
-  type = "nacos"
-
-  nacos {
-    serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
-  }
-}
-
-config {
-  type = "nacos"
-
-  nacos {
-    serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
-  }
-}
-```
-
-##### 配置 bootstrap.properties
-
-```
-spring.application.name=storage-service
-spring.main.allow-bean-definition-overriding=true
-# Config
-spring.cloud.nacos.config.server-addr=127.0.0.1:8848
-spring.cloud.nacos.config.namespace=public
-spring.cloud.nacos.config.group=DEFAULT_GROUP
-spring.cloud.nacos.config.prefix=${spring.application.name}
-spring.cloud.nacos.config.file-extension=properties
-# Discovery
-spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
-spring.cloud.nacos.discovery.namespace=public
-```
-
-这里的 Nacos 配置使用的是本地启动的，nacos.config 的 Group, namespace 都是默认的，如果需要可以修改成自己对应的，具体可以参考[Spring Cloud 使用 Nacos 作为服务注册中心](https://github.com/helloworlde/spring-cloud-alibaba-component/blob/master/cloud-discovery/README.md)
-
-##### application.properties
-
-- StorageService, PayService
-
-```
-server.port=8082
-management.endpoints.web.exposure.exclude=*
-# MySQL
-spring.datasource.url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
-spring.datasource.username=root
-spring.datasource.password=123456
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-# Dubbo
-dubbo.scan.base-packages=io.github.helloworlde.pay.service.impl
-dubbo.protocols.dubbo.name=dubbo
-dubbo.protocols.dubbo.port=-1
-dubbo.registry.address=spring-cloud://localhost
-```
-
-`dubbo.scan.base-packages`的路径为相应接口实现类的包路径
-`dubbo.protocols.dubbo.name=dubbo`用于指定协议
-`dubbo.protocols.dubbo.port=-1`使用随机端口，从 20880开始递增
-`dubbo.registry.address=spring-cloud://localhost`挂载到 Spring Cloud 注册中心
-
-- OrderService 
-
-```
-# 消费者的Dubbo配置和生产者略有差别
-dubbo.cloud.subscribed-services=*
-dubbo.registry.address=spring-cloud://localhost
-dubbo.protocols.dubbo.name=dubbo
-dubbo.protocols.dubbo.port=-1
-```
-
-`dubbo.cloud.subscribed-services=*`表示订阅所有的服务
-
-##### DataSourceProxy 配置
-
-这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，否则事务不会回滚，无法实现分布式事务 
-
-```java
-@Configuration
-public class DataSourceProxyConfig {
-
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource dataSource() {
-        return new DruidDataSource();
-    }
-
-    @Bean
-    public DataSourceProxy dataSourceProxy(DataSource dataSource) {
-        return new DataSourceProxy(dataSource);
-    }
-
-    @Bean
-    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
-        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
-        return sqlSessionFactoryBean.getObject();
-    }
-}
-```
-
-如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
-
-```
-spring.datasource.hikari.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.hikari.jdbc-url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
-spring.datasource.hikari.username=root
-spring.datasource.hikari.password=123456
-```
-
-```java
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.hikari")
-    public DataSource dataSource() {
-        return new HikariDataSource();
-    }
-```
-
-#### Pay-Service
-
-- PayService 接口 
-
-```java
-public interface PayService {
-    OperationResponse reduceBalance(ReduceBalanceRequestVO reduceBalanceRequestVO) throws Exception;
-}
-```
-
-- PayService 实现
-
-```java
-// Dubbo 的 Service
-@Service
-@Slf4j
-public class PayServiceImpl implements PayService {
-
-    @Autowired
-    private AccountDao accountDao;
-
-    @Override
-    public OperationResponse reduceBalance(ReduceBalanceRequestVO reduceBalanceRequestVO) throws Exception {
-        checkBalance(reduceBalanceRequestVO.getUserId(), reduceBalanceRequestVO.getPrice());
-
-        Integer record = accountDao.reduceBalance(reduceBalanceRequestVO.getPrice());
-      
-        return OperationResponse.builder()
-                                .success(record > 0)
-                                .message(record > 0 ? "操作成功" : "扣余额失败")
-                                .build();
-    }
-}
-```
-
-Storage-Service 和 Pay-Service 类似
-
-#### Order-Service
-
-- OrderServiceImpl.java
-
-```java
-// Spring 的 Service
-@Service
-@Slf4j
-public class OrderServiceImpl implements OrderService {
-
-    @Autowired
-    private OrderDao orderDao;
-
-    @Reference
-    @Lazy
-    private PayService payService;
-
-    @Reference
-    @Lazy
-    private StorageService storageService;
-
-
-    @Override
-    public OperationResponse placeOrder(PlaceOrderRequestVO placeOrderRequestVO) throws Exception {
-
-        Integer price = placeOrderRequestVO.getPrice();
-        // ...
-        OperationResponse storageOperationResponse = storageService.reduceStock(reduceStockRequestVO);
-        // ...
-        OperationResponse balanceOperationResponse = payService.reduceBalance(reduceBalanceRequestVO);
-        // ...       
-        return OperationResponse.builder()
-                                .success(balanceOperationResponse.isSuccess() && storageOperationResponse.isSuccess())
-                                .build();
-    }
-
-}
-```
-
-- 添加相应的 REST 接口
-
-- 在应用入口添加 `@EnableDubbo`注解
-
 ## 测试
 
 - 启动应用
@@ -481,3 +190,55 @@ FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'seata'
   AND TABLE_NAME = 'undo_log'
 ```
+
+## 注意 
+
+### DataSourceProxy 配置
+
+这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，且是 `@Primary`默认的数据源，否则事务不会回滚，无法实现分布式事务 
+
+```java
+@Configuration
+public class DataSourceProxyConfig {
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public DruidDataSource druidDataSource() {
+        return new DruidDataSource();
+    }
+
+    @Primary
+    @Bean
+    public DataSourceProxy dataSource(DruidDataSource druidDataSource) {
+        return new DataSourceProxy(druidDataSource);
+    }
+    
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
+        return sqlSessionFactoryBean.getObject();
+    }    
+}
+```
+
+如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
+
+```properties
+spring.datasource.hikari.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.hikari.jdbc-url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
+spring.datasource.hikari.username=root
+spring.datasource.hikari.password=123456
+```
+
+```java
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
+    public DataSource dataSource() {
+        return new HikariDataSource();
+    }
+```
+
+### 版本
+
+需要注意的是当前Spring Boot 和 Spring Cloud 以及 Spring Cloud Alibaba 的版本号需要互相对应，否则可能会存在各种问题；具体可以参考[版本说明](https://github.com/spring-cloud-incubator/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E)
