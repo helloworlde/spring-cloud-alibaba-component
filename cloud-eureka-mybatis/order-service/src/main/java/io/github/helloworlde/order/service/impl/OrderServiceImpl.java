@@ -2,6 +2,8 @@ package io.github.helloworlde.order.service.impl;
 
 import io.github.helloworlde.common.OperationResponse;
 import io.github.helloworlde.order.dao.OrderDao;
+import io.github.helloworlde.order.feign.PayServiceClient;
+import io.github.helloworlde.order.feign.StorageServiceClient;
 import io.github.helloworlde.order.model.Order;
 import io.github.helloworlde.order.model.OrderStatus;
 import io.github.helloworlde.order.model.PlaceOrderRequestVO;
@@ -13,7 +15,6 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author HelloWood
@@ -23,13 +24,13 @@ import org.springframework.web.client.RestTemplate;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private OrderDao orderDao;
 
-    private final String STORAGE_SERVICE_HOST = "http://storage-service/storage";
-    private final String PAY_SERVICE_HOST = "http://pay-service/pay";
+    @Autowired
+    private PayServiceClient payServiceClient;
+
+    @Autowired
+    private StorageServiceClient storageServiceClient;
 
     @GlobalTransactional
     @Override
@@ -53,8 +54,7 @@ public class OrderServiceImpl implements OrderService {
                                                                         .productId(placeOrderRequestVO.getProductId())
                                                                         .amount(amount)
                                                                         .build();
-        String storageReduceUrl = String.format("%s/reduceStock", STORAGE_SERVICE_HOST);
-        OperationResponse storageOperationResponse = restTemplate.postForObject(storageReduceUrl, reduceStockRequestVO, OperationResponse.class);
+        OperationResponse storageOperationResponse = storageServiceClient.reduceStock(reduceStockRequestVO);
         log.info("扣减库存结果:{}", storageOperationResponse);
 
         // 扣减余额
@@ -64,8 +64,7 @@ public class OrderServiceImpl implements OrderService {
                                                                               .price(price)
                                                                               .build();
 
-        String reduceBalanceUrl = String.format("%s/reduceBalance", PAY_SERVICE_HOST);
-        OperationResponse balanceOperationResponse = restTemplate.postForObject(reduceBalanceUrl, reduceBalanceRequestVO, OperationResponse.class);
+        OperationResponse balanceOperationResponse = payServiceClient.reduceBalance(reduceBalanceRequestVO);
         log.info("扣减余额结果:{}", balanceOperationResponse);
 
         Integer updateOrderRecord = orderDao.updateOrder(order.getId(), OrderStatus.SUCCESS);
