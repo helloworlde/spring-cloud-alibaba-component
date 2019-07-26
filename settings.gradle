@@ -5,40 +5,39 @@ pluginManagement {
 }
 rootProject.name = 'alibaba-component'
 
-//include('boot-config')
-//include('cloud-config')
-//include('cloud-discovery/consumer')
-//include('cloud-discovery/provider')
-//
-//include('sentinel-nacos-config')
-//include('cloud-oss')
-//
-//include('cloud-seata-mybatis/pay-service')
-//include('cloud-seata-mybatis/order-service')
-//include('cloud-seata-mybatis/storage-service')
-//
-//include('cloud-seata-jpa/pay-service')
-//include('cloud-seata-jpa/order-service')
-//include('cloud-seata-jpa/storage-service')
-//
-//include('cloud-seata-nacos/pay-service')
-//include('cloud-seata-nacos/order-service')
-//include('cloud-seata-nacos/storage-service')
-//
-//include('cloud-dubbo-nacos/dubbo-base')
-//include('cloud-dubbo-nacos/pay-service')
-//include('cloud-dubbo-nacos/order-service')
-//include('cloud-dubbo-nacos/storage-service')
+include('boot-config')
+include('cloud-config')
+include('cloud-discovery/consumer')
+include('cloud-discovery/provider')
 
-//include('cloud-dubbo-zk/dubbo-base')
-//include('cloud-dubbo-zk/provider')
-//include('cloud-dubbo-zk/consumer')
+include('sentinel-nacos-config')
+include('cloud-oss')
 
-//include('cloud-seata-dubbo-nacos/dubbo-base')
-//include('cloud-seata-dubbo-nacos/pay-service')
-//include('cloud-seata-dubbo-nacos/order-service')
-//include('cloud-seata-dubbo-nacos/storage-service')
+include('cloud-seata-mybatis/pay-service')
+include('cloud-seata-mybatis/order-service')
+include('cloud-seata-mybatis/storage-service')
 
+include('cloud-seata-jpa/pay-service')
+include('cloud-seata-jpa/order-service')
+include('cloud-seata-jpa/storage-service')
+
+include('cloud-seata-nacos/pay-service')
+include('cloud-seata-nacos/order-service')
+include('cloud-seata-nacos/storage-service')
+
+include('cloud-dubbo-nacos/dubbo-base')
+include('cloud-dubbo-nacos/pay-service')
+include('cloud-dubbo-nacos/order-service')
+include('cloud-dubbo-nacos/storage-service')
+
+include('cloud-dubbo-zk/dubbo-base')
+include('cloud-dubbo-zk/provider')
+include('cloud-dubbo-zk/consumer')
+
+include('cloud-seata-dubbo-nacos/dubbo-base')
+include('cloud-seata-dubbo-nacos/pay-service')
+include('cloud-seata-dubbo-nacos/order-service')
+include('cloud-seata-dubbo-nacos/storage-service')
 
 include('cloud-eureka-mybatis/common')
 include('cloud-eureka-mybatis/eureka-service')
