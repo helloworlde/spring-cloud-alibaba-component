@@ -39,12 +39,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    
-    // Seata 0.5.2 版本有一些 bug，使用 0.6.1
+
+    // Seata 0.5.2 版本有一些 bug，使用 0.7.1  
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-seata') {
         exclude group: 'io.seata', module: 'seata-spring'
     }
-    compile('io.seata:seata-all:0.6.1')
+    compile('io.seata:seata-all:0.7.1')
 
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
     compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
