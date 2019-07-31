@@ -72,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
         log.info("更新订单:{} {}", order.getId(), updateOrderRecord > 0 ? "成功" : "失败");
 
         return OperationResponse.builder()
-                                // .success(balanceOperationResponse.isSuccess() && storageOperationResponse.isSuccess())
+                                .success(balanceOperationResponse.isSuccess() && storageOperationResponse.isSuccess())
                                 .build();
     }
 
