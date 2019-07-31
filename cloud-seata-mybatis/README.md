@@ -69,10 +69,20 @@ docker run --name nacos -p 8848:8848 -e MODE=standalone nacos/nacos-server
 
 ### 启动 Seata Server 
 
-在 [Seata Release](https://github.com/seata/seata/releases) 下载最新版的 Seata Server，解压后执行以下命令启动，这里使用 file 配置
+可以直接通过bash 脚本启动 Seata Server，也可以通过 Docker 镜像启动，但是 Docker 方式目前只支持使用 file 的模式，不支持将 Seata-Server 注册到 Eureka 或 Seata 等注册中心
+
+- 通过脚本启动
+
+在 [Seata Release](https://github.com/seata/seata/releases) 下载相应版本的 Seata Server，解压后执行以下命令启动，这里使用 file 配置
 
 ```bash
 sh ./bin/seata-server.sh 8091 file
+```
+
+- 通过 Docker 启动
+
+```bash
+docker run --name seata-file -d -p 8091:8091 hellowoodes/seata:0.7.1-file
 ```
 
 ## 测试

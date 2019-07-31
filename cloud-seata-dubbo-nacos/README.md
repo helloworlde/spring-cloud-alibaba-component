@@ -69,7 +69,7 @@ docker run --name nacos -p 8848:8848 -e MODE=standalone nacos/nacos-server
 
 ### 启动 Seata Server 
 
-1. 在 [Seata Release](https://github.com/seata/seata/releases) 下载最新版的 Seata Server 并解压
+1. 在 [Seata Release](https://github.com/seata/seata/releases) 下载相应版本的 Seata Server 并解压
 2. 修改 `conf/registry.conf` 配置，将 type 改为 `nacos`
 
 ```
