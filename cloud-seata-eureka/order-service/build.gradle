@@ -36,7 +36,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile project(':cloud-eureka-mybatis/common')
+    compile project(':cloud-seata-eureka/common')
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
