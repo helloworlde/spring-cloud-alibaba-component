@@ -68,7 +68,7 @@ docker run --name nacos -p 8848:8848 -e MODE=standalone nacos/nacos-server
 
 - build.gradle 
 
-```java
+```groovy
 plugins {
     id 'java'
 }
@@ -104,7 +104,7 @@ dependencies {
 
 ##### 配置依赖 build.gradle 
 
-```gradle
+```groovy
 
 dependencies {
     compile project(':cloud-dubbo-nacos/dubbo-base')
@@ -132,7 +132,7 @@ dependencies {
 
 - 生产者
 
-```
+```properties
 spring.application.name=storage-service
 spring.main.allow-bean-definition-overriding=true
 # Config
@@ -152,7 +152,7 @@ spring.cloud.nacos.discovery.namespace=public
 
 - 生产者
 
-```
+```properties
 server.port=8082
 management.endpoints.web.exposure.exclude=*
 # MySQL
@@ -213,7 +213,7 @@ Storage-Service 和 Pay-Service 类似
 
 - bootstrap.properties
 
-```
+```properties
 spring.application.name=order-service
 # Config
 spring.cloud.nacos.config.server-addr=127.0.0.1:8848
@@ -229,7 +229,7 @@ spring.main.allow-bean-definition-overriding=true
 
 - application.properties
 
-```
+```properties
 server.port=8081
 management.endpoints.web.exposure.exclude=*
 # MySQL
@@ -335,13 +335,15 @@ java.lang.NullPointerException: null
 - A component required a bean named 'dubbo' that could not be found.
 
 配置无效：
-```
+
+```properties
 dubbo.protocol.name=dubbo
 dubbo.protocol.port=-1
 ```
+
 需要改成以下才生效 
 
-```
+```properties
 dubbo.protocols.dubbo.name=dubbo
 dubbo.protocols.dubbo.port=-1
 ```
@@ -352,7 +354,7 @@ dubbo.protocols.dubbo.port=-1
 
 这是因为已经启动的应用占用了 qos 服务的 22222 端口，虽然中有 qos 相关的配置，但是并不会起作用，需要在JVM的启动参数中添加 `-Ddubbo.application.qos.enable=false -Ddubbo.application.qos.accept.foreign.ip=false`
 
-```
+```java
 2019-07-02 15:30:33.122  WARN 10613 --- [           main] o.a.d.qos.protocol.QosProtocolWrapper    :  [DUBBO] Fail to start qos server: , dubbo version: 2.7.1, current host: 172.16.81.91
 
 java.net.BindException: Address already in use

@@ -40,7 +40,7 @@ CREATE TABLE orders
 );
 
 INSERT INTO account (id, balance)
-VALUES (1, 100);
+VALUES (1, 10);
 INSERT INTO product (id, price, stock)
 VALUES (1, 5, 10);
 
@@ -49,6 +49,7 @@ CREATE TABLE undo_log
     id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
     branch_id     BIGINT(20)   NOT NULL,
     xid           VARCHAR(100) NOT NULL,
+    context       VARCHAR(128) NOT NULL,
     rollback_info LONGBLOB     NOT NULL,
     log_status    INT(11)      NOT NULL,
     log_created   DATETIME     NOT NULL,
@@ -99,10 +100,11 @@ config {
 修改 `service.vgroup_mapping`为自己应用对应的名称；如果有多个服务，添加相应的配置
 
 如 
-```
+
+```properties
 service.vgroup_mapping.my_test_tx_group=default
 
-//改为 
+#改为 
 
 service.vgroup_mapping.order-service-fescar-service-group=default
 service.vgroup_mapping.pay-service-fescar-service-group=default

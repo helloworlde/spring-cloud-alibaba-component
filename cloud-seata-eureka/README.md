@@ -1,5 +1,3 @@
-@(SpringCloud)[SpringCloud, Seata, Feign]
-
 # Spring Cloud 使用Feign 实现远程调用，Eureka 作为注册中心，使用 Seata 实现分布式事务
 
 > 使用 Seata 作为分布式事务组件，注册中心使用 Eureka，使用 MySQL 数据库和 MyBatis，使用 Feign 实现远程调用
@@ -217,13 +215,13 @@ spring.datasource.hikari.password=123456
 
 application.properties 里面的`tx-service-group`配置必须要和`file.conf`里面的`service`的`vgroup_mapping`的名称一致
  
-```
+```properties
 spring.cloud.alibaba.seata.tx-service-group=storage-service-fescar-service-group
 ```
 
 - file.conf
 
-```
+```properties
 vgroup_mapping.storage-service-fescar-service-group = "default"
 ```
 
