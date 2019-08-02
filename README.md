@@ -104,6 +104,8 @@ public class DataSourceProxyConfig {
 |:----|:-----|:----|
 |Spring Boot |2.1.5.RELEASE||
 |Spring Cloud |Greenwich.SR1||
-|Spring Cloud Alibaba |0.9.1.BUILD-SNAPSHOT|| 
-|Seata |0.6.1/0.7.1|`org.springframework.cloud:spring-cloud-starter-alibaba-seata:0.9.1.BUILD-SNAPSHOT` 中的 0.5.2 中有一些问题，所以单独使用Seata 0.6.1/0.7.1|
-|Dubbo |2.7.1||
+|Spring Cloud Alibaba |2.1.0.RELEASE|| 
+|Seata |0.7.1||
+|Dubbo |2.7.3||
+
+Spring Cloud Alibaba 毕业后，Group-id 和部分 ArtifactId 有所变化，需要注意

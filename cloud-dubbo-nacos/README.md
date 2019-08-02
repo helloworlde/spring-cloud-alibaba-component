@@ -113,9 +113,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
 
-    compile('org.springframework.cloud:spring-cloud-starter-dubbo')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config')
-    compile('org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery')
+    compile('com.alibaba.cloud:spring-cloud-starter-dubbo')
+    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config')
+    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery')
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -326,9 +326,9 @@ curl -X POST \
 
 ```java
 java.lang.NullPointerException: null
-	at org.springframework.cloud.alibaba.dubbo.metadata.resolver.DubboTransportedAttributesResolver.resolve(DubboTransportedAttributesResolver.java:47) ~[spring-cloud-alibaba-dubbo-0.9.1.BUILD-SNAPSHOT.jar:0.9.1.BUILD-SNAPSHOT]
-	at org.springframework.cloud.alibaba.dubbo.autoconfigure.DubboLoadBalancedRestTemplateAutoConfiguration.getDubboTranslatedAttributes(DubboLoadBalancedRestTemplateAutoConfiguration.java:143) ~[spring-cloud-alibaba-dubbo-0.9.1.BUILD-SNAPSHOT.jar:0.9.1.BUILD-SNAPSHOT]
-	at org.springframework.cloud.alibaba.dubbo.autoconfigure.DubboLoadBalancedRestTemplateAutoConfiguration.adaptRestTemplates(DubboLoadBalancedRestTemplateAutoConfiguration.java:118) ~[spring-cloud-alibaba-dubbo-0.9.1.BUILD-SNAPSHOT.jar:0.9.1.BUILD-SNAPSHOT]
+	at org.springframework.cloud.alibaba.dubbo.metadata.resolver.DubboTransportedAttributesResolver.resolve(DubboTransportedAttributesResolver.java:47) ~[spring-cloud-alibaba-dubbo-2.1.0.RELEASE.jar:2.1.0.RELEASE]
+	at org.springframework.cloud.alibaba.dubbo.autoconfigure.DubboLoadBalancedRestTemplateAutoConfiguration.getDubboTranslatedAttributes(DubboLoadBalancedRestTemplateAutoConfiguration.java:143) ~[spring-cloud-alibaba-dubbo-2.1.0.RELEASE.jar:2.1.0.RELEASE]
+	at org.springframework.cloud.alibaba.dubbo.autoconfigure.DubboLoadBalancedRestTemplateAutoConfiguration.adaptRestTemplates(DubboLoadBalancedRestTemplateAutoConfiguration.java:118) ~[spring-cloud-alibaba-dubbo-2.1.0.RELEASE.jar:2.1.0.RELEASE]
 	...
 ```
 

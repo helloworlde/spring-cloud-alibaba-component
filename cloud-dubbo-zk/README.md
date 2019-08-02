@@ -62,7 +62,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    compile('org.springframework.cloud:spring-cloud-starter-dubbo')
+    compile('com.alibaba.cloud:spring-cloud-starter-dubbo')
     compile('org.springframework.cloud:spring-cloud-starter-zookeeper-discovery')
 
     compileOnly 'org.projectlombok:lombok'

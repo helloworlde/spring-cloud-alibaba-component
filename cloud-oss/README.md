@@ -9,18 +9,18 @@
 ```gradle
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '0.9.1.BUILD-SNAPSHOT'
+    springCloudAlibabaVersion = '2.1.0.RELEASE'
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        mavenBom "org.springframework.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+        mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
     }
 }
 
 dependencies {
-        compile('org.springframework.cloud:spring-cloud-starter-alicloud-oss')
+        compile('com.alibaba.cloud:spring-cloud-starter-alicloud-oss')
 }
 ```
 
