@@ -137,7 +137,7 @@ init nacos config finished, please start seata-server
 
 ```bash
 cd ..
-sh ./bin/seata-server.sh 8091 file
+sh ./bin/seata-server.sh -p 8091 -m file
 ```
 
 启动后在 Nacos 的服务列表下面可以看到一个名为`serverAddr`的服务
