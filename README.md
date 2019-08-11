@@ -38,6 +38,7 @@
 - [Spring Cloud 使用 Seata 实现分布式事务 - Mybatis/Nacos](./cloud-seata-nacos/README.md)
 - [Spring Cloud 使用 Seata 实现分布式事务 - Mybatis/Nacos/Dubbo](./cloud-seata-dubbo-nacos/README.md)
 - [Spring Cloud 使用 Seata 实现分布式事务 - Mybatis/Eureka/Feign](./cloud-seata-eureka/README.md)
+- [Spring Cloud 使用 Seata 实现分布式事务 - Mybatis多数据源](./cloud-seata-multi-datasource/README.md)
 
 MyBatis 和 JPA 通过 Seata 实现分布式事务都需要注入 `io.seata.rm.datasource.DataSourceProxy`, 不同的是，MyBatis 还需要额外注入 `org.apache.ibatis.session.SqlSessionFactory`
 

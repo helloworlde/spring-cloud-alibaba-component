@@ -1,0 +1,49 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'io.github.helloworlde'
+archivesBaseName = 'cloud-seata-multi-datasource'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven { url 'https://repo.spring.io/snapshot/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    mavenCentral()
+}
+
+
+ext {
+    springCloudAlibabaVersion = '2.1.0.RELEASE'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
+    
+    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-seata')
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    runtime("mysql:mysql-connector-java")
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
