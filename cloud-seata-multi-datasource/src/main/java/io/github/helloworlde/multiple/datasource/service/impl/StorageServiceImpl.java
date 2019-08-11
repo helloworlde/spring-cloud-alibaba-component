@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author HelloWood
@@ -35,7 +34,7 @@ public class StorageServiceImpl implements StorageService {
     public boolean reduceStock(Long productId, Integer amount) throws Exception {
         log.info("=============STORAGE=================");
         DynamicDataSourceContextHolder.setDataSourceKey(DataSourceKey.STORAGE);
-        log.info("当前 XID: {}, 事务 Name:{}", RootContext.getXID(), TransactionSynchronizationManager.getCurrentTransactionName());
+        log.info("当前 XID: {}", RootContext.getXID());
 
         // 检查库存
         checkStock(productId, amount);
