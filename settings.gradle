@@ -48,3 +48,4 @@ include('cloud-seata-eureka/storage-service')
 
 include('cloud-seata-multi-datasource')
 include('cloud-seata-multi-datasource-mybatis-plus')
+include('cloud-seata-sharding-jdbc')
