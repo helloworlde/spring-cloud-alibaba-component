@@ -63,15 +63,13 @@ CREATE TABLE undo_log
   DEFAULT CHARSET = utf8;
 ```
 
-注意，0.7.1版本的`undo_log`表中增加了`context`字段
-
 ### 启动 Eureka
 
 启动项目的 Eureka 服务
 
 ### 启动 Seata Server 
 
-在 [Seata Release](https://github.com/seata/seata/releases) 下载0.7.1版本的 Seata Server，解压
+在 [Seata Release](https://github.com/seata/seata/releases) 下载最新版本的 Seata Server，解压
 
 - 修改registry.conf
 
@@ -225,7 +223,7 @@ spring.cloud.alibaba.seata.tx-service-group=storage-service-fescar-service-group
 vgroup_mapping.storage-service-fescar-service-group = "default"
 ```
 
-该配置在`org.springframework.cloud:spring-cloud-starter-alibaba-seata`中默认为`spring.application.name` +`-fescar-service-group`，在 Seata 0.7.1 中需要通过指定`spring.cloud.alibaba.seata.tx-service-group`覆盖
+该配置在`org.springframework.cloud:spring-cloud-starter-alibaba-seata`中默认为`spring.application.name` +`-fescar-service-group`，在 Seata 0.7.1+ 中需要通过指定`spring.cloud.alibaba.seata.tx-service-group`覆盖
 
 ### 版本
 
