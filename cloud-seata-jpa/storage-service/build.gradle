@@ -40,7 +40,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-seata')
+    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-seata'){
+        exclude group: 'io.seata', module: 'seata-spring'
+    }
+    compile('io.seata:seata-all:0.9.0')
 
     compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config')
     compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery')
