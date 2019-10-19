@@ -15,11 +15,11 @@ public interface AccountDao {
     /**
      * 获取账户余额
      *
-     * @param userId 用户 ID
+     * @param id 用户 ID
      * @return 账户余额
      */
-    @Select("SELECT balance FROM account WHERE id = #{userId}")
-    Integer getBalance(@Param("userId") Long userId);
+    @Select("SELECT balance FROM account WHERE id = #{id}")
+    Integer getBalance(@Param("id") Long id);
 
     /**
      * 扣减余额
