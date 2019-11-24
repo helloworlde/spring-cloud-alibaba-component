@@ -1,0 +1,76 @@
+version: "3"
+# TODO depend_on 启动顺序要求依赖的应用完全启动后再启动
+services:
+  eureka-service:
+    build: eureka-service
+    image: eureka-service
+    hostname: eureka-service
+    ports:
+      - "8761:8761"
+    command: echo "eureka service"
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  seata-server:
+    image: seataio/seata-server
+    hostname: seata-server
+    ports:
+      - "8091:8091"
+    depends_on:
+      - eureka-service
+    environment:
+      - TZ=Asia/Shanghai
+      - SEATA_CONFIG_NAME=file:/root/seata-config/registry
+      - SEATA_IP=172.21.0.4
+    volumes:
+      - "./seata-config:/root/seata-config"
+  mysql:
+    image: mysql:5.7.17
+    ports:
+      - 3309:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - "./init:/docker-entrypoint-initdb.d/"
+  pay-service:
+    build: pay-service
+    image: pay-service
+    hostname: pay-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-service
+      - seata-server
+      - mysql
+    environment:
+      - TZ=Asia/Shanghai
+    external_links:
+      - mysql7
+  order-service:
+    build: order-service
+    image: order-service
+    hostname: order-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-service
+      - seata-server
+      - mysql
+    environment:
+      - TZ=Asia/Shanghai
+  storage-service:
+    build: storage-service
+    image: storage-service
+    hostname: storage-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-service
+      - seata-server
+      - mysql
+    environment:
+      - TZ=Asia/Shanghai
