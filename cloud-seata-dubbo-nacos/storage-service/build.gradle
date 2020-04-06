@@ -43,7 +43,10 @@ dependencies {
     compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config')
     compile('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery')
 
-    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-seata')
+    compile('com.alibaba.cloud:spring-cloud-starter-alibaba-seata'){
+        exclude group: 'io.seata', module: 'seata-spring'
+    }
+    compile("io.seata:seata-all:${seataAllVersion}")
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
