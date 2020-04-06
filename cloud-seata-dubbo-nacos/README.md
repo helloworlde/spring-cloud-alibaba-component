@@ -79,8 +79,9 @@ registry {
 
   nacos {
     serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
+    namespace = ""
+    cluster = ""
+    group = "SEATA_GROUP"
   }
 }
 
@@ -89,31 +90,21 @@ config {
 
   nacos {
     serverAddr = "localhost"
-    namespace = "public"
-    cluster = "default"
+    namespace = ""
+    group = "SEATA_GROUP"
   }
 }
 ```
 
 3. 修改 `conf/nacos-config.txt`配置
 
-修改 `service.vgroup_mapping`为自己应用对应的名称；如果有多个服务，添加相应的配置
+修改 `service.vgroupMapping`为自己应用对应的名称；如果有多个服务，添加相应的配置
 
 如 
 
 ```properties
-service.vgroup_mapping.my_test_tx_group=default
-
-#改为 
-
-service.vgroup_mapping.order-service-fescar-service-group=default
-service.vgroup_mapping.pay-service-fescar-service-group=default
-service.vgroup_mapping.storage-service-fescar-service-group=default
+service.vgroupMapping.my_test_tx_group=default
 ```
-
-也可以在 Nacos 配置页面添加，data-id 为 `service.vgroup_mapping.${YOUR_SERVICE_NAME}-fescar-service-group`, group 为 `SEATA_GROUP`， 如果不添加该配置，启动后会提示`no available server to connect` 
-
-注意配置文件末尾有空行，需要删除，否则会提示失败，尽管实际上是成功的
 
 4. 将 Seata 配置添加到 Nacos 中 
 
