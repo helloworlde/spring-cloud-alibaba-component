@@ -52,6 +52,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    compile project(':cloud-seata-nacos/base')
+
     runtime("mysql:mysql-connector-java")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -31,6 +31,8 @@ include('cloud-seata-jpa/pay-service')
 include('cloud-seata-jpa/order-service')
 include('cloud-seata-jpa/storage-service')
 
+
+include('cloud-seata-nacos/base')
 include('cloud-seata-nacos/pay-service')
 include('cloud-seata-nacos/order-service')
 include('cloud-seata-nacos/storage-service')

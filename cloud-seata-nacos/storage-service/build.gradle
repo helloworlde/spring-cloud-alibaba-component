@@ -49,6 +49,8 @@ dependencies {
     }
     compile("io.seata:seata-all:${seataAllVersion}")
 
+    compile project(':cloud-seata-nacos/base')
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
