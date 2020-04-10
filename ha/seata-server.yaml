@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seata-ha-server
+  namespace: default
+  labels:
+    k8s-app: seata-ha-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8091
+      protocol: TCP
+      name: http
+  selector:
+    k8s-app: seata-ha-server
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seata-ha-server
+  namespace: default
+  labels:
+    k8s-app: seata-ha-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      k8s-app: seata-ha-server
+  template:
+    metadata:
+      labels:
+        k8s-app: seata-ha-server
+    spec:
+      containers:
+        - name: seata-ha-server
+          image: docker.io/seataio/seata-server:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: STORE_MODE
+              value: db
+            - name: SEATA_CONFIG_NAME
+              value: file:/root/seata-config/registry
+          ports:
+            - name: http
+              containerPort: 8091
+              protocol: TCP
+          volumeMounts:
+            - name: seata-config
+              mountPath: /root/seata-config
+      volumes:
+        - name: seata-config
+          configMap:
+            name: seata-ha-server-config
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-ha-server-config
+data:
+  registry.conf: |
+    registry {
+        type = "nacos"
+        nacos {
+          application = "seata-server"
+          serverAddr = "192.168.199.2"
+        }
+    }
+    config {
+      type = "nacos"
+      nacos {
+        serverAddr = "192.168.199.2"
+        group = "SEATA_GROUP"
+      }
+    }

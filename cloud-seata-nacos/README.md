@@ -83,7 +83,7 @@ registry {
 
   nacos {
     serverAddr = "localhost"
-    namespace = "public"
+    namespace = ""
     cluster = "default"
   }
 }
@@ -93,7 +93,7 @@ config {
 
   nacos {
     serverAddr = "localhost"
-    namespace = "public"
+    namespace = ""
     cluster = "default"
   }
 }
@@ -112,8 +112,6 @@ sh nacos-config.sh localhost
 init nacos config finished, please start seata-server
 ```
 
-在 Nacos 管理页面应该可以看到有 47 个 Group 为`SEATA_GROUP`的配置
-
 5. 启动 Seata Server 
 
 ```bash
@@ -121,9 +119,24 @@ cd ..
 sh ./bin/seata-server.sh
 ```
 
-启动后在 Nacos 的服务列表下面可以看到一个名为`serverAddr`的服务
+启动后在 Nacos 的服务列表下面可以看到一个名为`seata-server`的服务
 
 ## 测试
+
+
+- 添加配置
+
+在 public 的命名空间下，分别创建 data-id 为 `order-service.properties`, `pay-service.properties`, `storage-service.properties` 的配置，内容相同，需要修改数据库的地址、用户名和密码
+
+```properties
+# MySQL
+spring.datasource.url=jdbc:mysql://192.168.199.2:30060/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=123456
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+# Seata
+spring.cloud.alibaba.seata.tx-service-group=my_test_tx_group
+```
 
 - 启动应用
 
@@ -175,54 +188,6 @@ SELECT
 FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'seata'
   AND TABLE_NAME = 'undo_log'
-```
-
-## 注意 
-
-### DataSourceProxy 配置
-
-这里是尤其需要注意的，Seata 是通过代理数据源实现事务分支，所以需要配置 `io.seata.rm.datasource.DataSourceProxy` 的 Bean，且是 `@Primary`默认的数据源，否则事务不会回滚，无法实现分布式事务 
-
-```java
-@Configuration
-public class DataSourceProxyConfig {
-
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DruidDataSource druidDataSource() {
-        return new DruidDataSource();
-    }
-
-    @Primary
-    @Bean
-    public DataSourceProxy dataSource(DruidDataSource druidDataSource) {
-        return new DataSourceProxy(druidDataSource);
-    }
-    
-    @Bean
-    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception {
-        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
-        return sqlSessionFactoryBean.getObject();
-    }    
-}
-```
-
-如果使用的是 Hikari 数据源，需要修改数据源的配置，以及注入的 Bean 的配置前缀
-
-```properties
-spring.datasource.hikari.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.hikari.jdbc-url=jdbc:mysql://localhost:3306/seata?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false
-spring.datasource.hikari.username=root
-spring.datasource.hikari.password=123456
-```
-
-```java
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.hikari")
-    public DataSource dataSource() {
-        return new HikariDataSource();
-    }
 ```
 
 ### 版本

@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.1.5.RELEASE'
     id 'java'
+    id 'com.palantir.docker' version '0.22.1'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -25,7 +26,7 @@ repositories {
 
 ext {
     springCloudVersion = 'Greenwich.SR1'
-    springCloudAlibabaVersion = '2.1.0.RELEASE'
+    springCloudAlibabaVersion = '2.1.1.RELEASE'
 }
 
 dependencyManagement {
@@ -54,4 +55,11 @@ dependencies {
     runtime("mysql:mysql-connector-java")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+
+docker {
+    name "${dockerAccount}/seata-ha-${archivesBaseName}:${dockerImageVersion}"
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
 }
