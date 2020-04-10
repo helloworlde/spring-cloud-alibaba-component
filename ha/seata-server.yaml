@@ -4,7 +4,7 @@ metadata:
   name: seata-ha-server
   namespace: default
   labels:
-    k8s-app: seata-ha-server
+    app.kubernetes.io/name: seata-ha-server
 spec:
   type: ClusterIP
   ports:
@@ -12,7 +12,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    k8s-app: seata-ha-server
+    app.kubernetes.io/name: seata-ha-server
 
 ---
 
@@ -22,24 +22,22 @@ metadata:
   name: seata-ha-server
   namespace: default
   labels:
-    k8s-app: seata-ha-server
+    app.kubernetes.io/name: seata-ha-server
 spec:
   replicas: 3
   selector:
     matchLabels:
-      k8s-app: seata-ha-server
+      app.kubernetes.io/name: seata-ha-server
   template:
     metadata:
       labels:
-        k8s-app: seata-ha-server
+        app.kubernetes.io/name: seata-ha-server
     spec:
       containers:
         - name: seata-ha-server
           image: docker.io/seataio/seata-server:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: STORE_MODE
-              value: db
             - name: SEATA_CONFIG_NAME
               value: file:/root/seata-config/registry
           ports:

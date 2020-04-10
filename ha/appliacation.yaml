@@ -9,7 +9,7 @@ spec:
   type: NodePort
   ports:
     - port: 8081
-      nodePort: 30083
+      nodePort: 30081
       protocol: TCP
       name: http
   selector:
