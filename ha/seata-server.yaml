@@ -17,13 +17,14 @@ spec:
 ---
 
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: seata-ha-server
   namespace: default
   labels:
     app.kubernetes.io/name: seata-ha-server
 spec:
+  serviceName: seata-ha-server
   replicas: 3
   selector:
     matchLabels:
