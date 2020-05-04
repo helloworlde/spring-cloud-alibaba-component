@@ -1,0 +1,387 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: seata-ha-mysql-secrets
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: MTIzNDU2
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: seata-ha-mysql-pv
+  labels:
+    type: local
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 250Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/root/workspace/data/mysql/data"
+  persistentVolumeReclaimPolicy: Retain
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seata-ha-mysql-pv-claim
+  labels:
+    app: seata-ha
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 250Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seata-ha-mysql
+  labels:
+    app: seata-ha
+spec:
+  type: NodePort
+  ports:
+    - port: 3306
+      nodePort: 30060
+  selector:
+    app: seata-ha
+    tier: mysql
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seata-ha-mysql
+  labels:
+    app: seata-ha
+spec:
+  selector:
+    matchLabels:
+      app: seata-ha
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: seata-ha
+        tier: mysql
+    spec:
+      containers:
+        - image: mysql:5.6
+          name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: seata-ha-mysql-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          args:
+            - "--ignore-db-dir=lost+found"
+            - "--character-set-server=utf8"
+            - "--collation-server=utf8_general_ci"
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: seata-ha-mysql-pv-claim
+        - name: mysql-initdb
+          configMap:
+            name: seata-ha-mysql-initdb-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-ha-mysql-initdb-config
+data:
+  initdb.sql: |
+    DROP DATABASE IF EXISTS seata;
+    CREATE DATABASE seata CHARSET 'utf8';
+    USE seata;
+    CREATE TABLE IF NOT EXISTS `global_table`
+    (
+    `xid`                       VARCHAR(128) NOT NULL,
+    `transaction_id`            BIGINT,
+    `status`                    TINYINT      NOT NULL,
+    `application_id`            VARCHAR(32),
+    `transaction_service_group` VARCHAR(32),
+    `transaction_name`          VARCHAR(128),
+    `timeout`                   INT,
+    `begin_time`                BIGINT,
+    `application_data`          VARCHAR(2000),
+    `gmt_create`                DATETIME,
+    `gmt_modified`              DATETIME,
+    PRIMARY KEY (`xid`),
+    KEY `idx_gmt_modified_status` (`gmt_modified`, `status`),
+    KEY `idx_transaction_id` (`transaction_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8;
+
+    CREATE TABLE IF NOT EXISTS `branch_table`
+    (
+    `branch_id`         BIGINT       NOT NULL,
+    `xid`               VARCHAR(128) NOT NULL,
+    `transaction_id`    BIGINT,
+    `resource_group_id` VARCHAR(32),
+    `resource_id`       VARCHAR(256),
+    `branch_type`       VARCHAR(8),
+    `status`            TINYINT,
+    `client_id`         VARCHAR(64),
+    `application_data`  VARCHAR(2000),
+    `gmt_create`        DATETIME(6),
+    `gmt_modified`      DATETIME(6),
+    PRIMARY KEY (`branch_id`),
+    KEY `idx_xid` (`xid`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8;
+    CREATE TABLE IF NOT EXISTS `lock_table`
+    (
+    `row_key`        VARCHAR(128) NOT NULL,
+    `xid`            VARCHAR(96),
+    `transaction_id` BIGINT,
+    `branch_id`      BIGINT       NOT NULL,
+    `resource_id`    VARCHAR(256),
+    `table_name`     VARCHAR(32),
+    `pk`             VARCHAR(36),
+    `gmt_create`     DATETIME,
+    `gmt_modified`   DATETIME,
+    PRIMARY KEY (`row_key`),
+    KEY `idx_branch_id` (`branch_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8;
+    CREATE TABLE IF NOT EXISTS `undo_log`
+    (
+    `id`            BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'increment id',
+    `branch_id`     BIGINT(20)   NOT NULL COMMENT 'branch transaction id',
+    `xid`           VARCHAR(100) NOT NULL COMMENT 'global transaction id',
+    `context`       VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
+    `rollback_info` LONGBLOB     NOT NULL COMMENT 'rollback info',
+    `log_status`    INT(11)      NOT NULL COMMENT '0:normal status,1:defense status',
+    `log_created`   DATETIME     NOT NULL COMMENT 'create datetime',
+    `log_modified`  DATETIME     NOT NULL COMMENT 'modify datetime',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `ux_undo_log` (`xid`, `branch_id`)
+    ) ENGINE = InnoDB
+    AUTO_INCREMENT = 1
+    DEFAULT CHARSET = utf8 COMMENT ='AT transaction mode undo table';
+
+    DROP DATABASE IF EXISTS nacos;
+    CREATE DATABASE nacos CHARSET 'utf8';
+    USE nacos;
+    CREATE TABLE `config_info`
+    (
+    `id`           BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `data_id`      VARCHAR(255) NOT NULL COMMENT 'data_id',
+    `group_id`     VARCHAR(255)          DEFAULT NULL,
+    `content`      LONGTEXT     NOT NULL COMMENT 'content',
+    `md5`          VARCHAR(32)           DEFAULT NULL COMMENT 'md5',
+    `gmt_create`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    `src_user`     TEXT COMMENT 'source user',
+    `src_ip`       VARCHAR(20)           DEFAULT NULL COMMENT 'source ip',
+    `app_name`     VARCHAR(128)          DEFAULT NULL,
+    `tenant_id`    VARCHAR(128)          DEFAULT '' COMMENT '租户字段',
+    `c_desc`       VARCHAR(256)          DEFAULT NULL,
+    `c_use`        VARCHAR(64)           DEFAULT NULL,
+    `effect`       VARCHAR(64)           DEFAULT NULL,
+    `type`         VARCHAR(64)           DEFAULT NULL,
+    `c_schema`     TEXT,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_configinfo_datagrouptenant` (`data_id`, `group_id`, `tenant_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='config_info';
+
+    CREATE TABLE `config_info_aggr`
+    (
+    `id`           BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `data_id`      VARCHAR(255) NOT NULL COMMENT 'data_id',
+    `group_id`     VARCHAR(255) NOT NULL COMMENT 'group_id',
+    `datum_id`     VARCHAR(255) NOT NULL COMMENT 'datum_id',
+    `content`      LONGTEXT     NOT NULL COMMENT '内容',
+    `gmt_modified` DATETIME     NOT NULL COMMENT '修改时间',
+    `app_name`     VARCHAR(128) DEFAULT NULL,
+    `tenant_id`    VARCHAR(128) DEFAULT '' COMMENT '租户字段',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_configinfoaggr_datagrouptenantdatum` (`data_id`, `group_id`, `tenant_id`, `datum_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='增加租户字段';
+
+    CREATE TABLE `config_info_beta`
+    (
+    `id`           BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `data_id`      VARCHAR(255) NOT NULL COMMENT 'data_id',
+    `group_id`     VARCHAR(128) NOT NULL COMMENT 'group_id',
+    `app_name`     VARCHAR(128)          DEFAULT NULL COMMENT 'app_name',
+    `content`      LONGTEXT     NOT NULL COMMENT 'content',
+    `beta_ips`     VARCHAR(1024)         DEFAULT NULL COMMENT 'betaIps',
+    `md5`          VARCHAR(32)           DEFAULT NULL COMMENT 'md5',
+    `gmt_create`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    `src_user`     TEXT COMMENT 'source user',
+    `src_ip`       VARCHAR(20)           DEFAULT NULL COMMENT 'source ip',
+    `tenant_id`    VARCHAR(128)          DEFAULT '' COMMENT '租户字段',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_configinfobeta_datagrouptenant` (`data_id`, `group_id`, `tenant_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='config_info_beta';
+
+    CREATE TABLE `config_info_tag`
+    (
+    `id`           BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `data_id`      VARCHAR(255) NOT NULL COMMENT 'data_id',
+    `group_id`     VARCHAR(128) NOT NULL COMMENT 'group_id',
+    `tenant_id`    VARCHAR(128)          DEFAULT '' COMMENT 'tenant_id',
+    `tag_id`       VARCHAR(128) NOT NULL COMMENT 'tag_id',
+    `app_name`     VARCHAR(128)          DEFAULT NULL COMMENT 'app_name',
+    `content`      LONGTEXT     NOT NULL COMMENT 'content',
+    `md5`          VARCHAR(32)           DEFAULT NULL COMMENT 'md5',
+    `gmt_create`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    `src_user`     TEXT COMMENT 'source user',
+    `src_ip`       VARCHAR(20)           DEFAULT NULL COMMENT 'source ip',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_configinfotag_datagrouptenanttag` (`data_id`, `group_id`, `tenant_id`, `tag_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='config_info_tag';
+
+    CREATE TABLE `config_tags_relation`
+    (
+    `id`        BIGINT(20)   NOT NULL COMMENT 'id',
+    `tag_name`  VARCHAR(128) NOT NULL COMMENT 'tag_name',
+    `tag_type`  VARCHAR(64)  DEFAULT NULL COMMENT 'tag_type',
+    `data_id`   VARCHAR(255) NOT NULL COMMENT 'data_id',
+    `group_id`  VARCHAR(128) NOT NULL COMMENT 'group_id',
+    `tenant_id` VARCHAR(128) DEFAULT '' COMMENT 'tenant_id',
+    `nid`       BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY (`nid`),
+    UNIQUE KEY `uk_configtagrelation_configidtag` (`id`, `tag_name`, `tag_type`),
+    KEY `idx_tenant_id` (`tenant_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='config_tag_relation';
+
+    CREATE TABLE `group_capacity`
+    (
+    `id`                BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `group_id`          VARCHAR(128)        NOT NULL DEFAULT '' COMMENT 'Group ID，空字符表示整个集群',
+    `quota`             INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '配额，0表示使用默认值',
+    `usage`             INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '使用量',
+    `max_size`          INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '单个配置大小上限，单位为字节，0表示使用默认值',
+    `max_aggr_count`    INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '聚合子配置最大个数，，0表示使用默认值',
+    `max_aggr_size`     INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '单个聚合数据的子配置大小上限，单位为字节，0表示使用默认值',
+    `max_history_count` INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '最大变更历史数量',
+    `gmt_create`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified`      DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_group_id` (`group_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='集群、各Group容量信息表';
+
+    CREATE TABLE `his_config_info`
+    (
+    `id`           BIGINT(64) UNSIGNED NOT NULL,
+    `nid`          BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `data_id`      VARCHAR(255)        NOT NULL,
+    `group_id`     VARCHAR(128)        NOT NULL,
+    `app_name`     VARCHAR(128)                 DEFAULT NULL COMMENT 'app_name',
+    `content`      LONGTEXT            NOT NULL,
+    `md5`          VARCHAR(32)                  DEFAULT NULL,
+    `gmt_create`   DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `gmt_modified` DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `src_user`     TEXT,
+    `src_ip`       VARCHAR(20)                  DEFAULT NULL,
+    `op_type`      CHAR(10)                     DEFAULT NULL,
+    `tenant_id`    VARCHAR(128)                 DEFAULT '' COMMENT '租户字段',
+    PRIMARY KEY (`nid`),
+    KEY `idx_gmt_create` (`gmt_create`),
+    KEY `idx_gmt_modified` (`gmt_modified`),
+    KEY `idx_did` (`data_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='多租户改造';
+
+
+    CREATE TABLE `tenant_capacity`
+    (
+    `id`                BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `tenant_id`         VARCHAR(128)        NOT NULL DEFAULT '' COMMENT 'Tenant ID',
+    `quota`             INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '配额，0表示使用默认值',
+    `usage`             INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '使用量',
+    `max_size`          INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '单个配置大小上限，单位为字节，0表示使用默认值',
+    `max_aggr_count`    INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '聚合子配置最大个数',
+    `max_aggr_size`     INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '单个聚合数据的子配置大小上限，单位为字节，0表示使用默认值',
+    `max_history_count` INT(10) UNSIGNED    NOT NULL DEFAULT '0' COMMENT '最大变更历史数量',
+    `gmt_create`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified`      DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tenant_id` (`tenant_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='租户容量信息表';
+
+
+    CREATE TABLE `tenant_info`
+    (
+    `id`            BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `kp`            VARCHAR(128) NOT NULL COMMENT 'kp',
+    `tenant_id`     VARCHAR(128) DEFAULT '' COMMENT 'tenant_id',
+    `tenant_name`   VARCHAR(128) DEFAULT '' COMMENT 'tenant_name',
+    `tenant_desc`   VARCHAR(256) DEFAULT NULL COMMENT 'tenant_desc',
+    `create_source` VARCHAR(32)  DEFAULT NULL COMMENT 'create_source',
+    `gmt_create`    BIGINT(20)   NOT NULL COMMENT '创建时间',
+    `gmt_modified`  BIGINT(20)   NOT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tenant_info_kptenantid` (`kp`, `tenant_id`),
+    KEY `idx_tenant_id` (`tenant_id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8
+    COLLATE = utf8_bin COMMENT ='tenant_info';
+
+    CREATE TABLE `users`
+    (
+    `username` VARCHAR(50)  NOT NULL PRIMARY KEY,
+    `password` VARCHAR(500) NOT NULL,
+    `enabled`  BOOLEAN      NOT NULL
+    );
+
+    CREATE TABLE `roles`
+    (
+    `username` VARCHAR(50) NOT NULL,
+    `role`     VARCHAR(50) NOT NULL,
+    UNIQUE INDEX `idx_user_role` (`username` ASC, `role` ASC) USING BTREE
+    );
+
+    CREATE TABLE `permissions`
+    (
+    `role`     VARCHAR(50)  NOT NULL,
+    `resource` VARCHAR(512) NOT NULL,
+    `action`   VARCHAR(8)   NOT NULL,
+    UNIQUE INDEX `uk_role_permission` (`role`, `resource`, `action`) USING BTREE
+    );
+
+    INSERT INTO users (username, password, enabled)
+    VALUES ('nacos', '$2a$10$EuWPZHzz32dJN7jexM34MOeYirDdFAZm2kuWj7VEOJhhZkDrxfvUu', TRUE);
+
+    INSERT INTO roles (username, role)
+    VALUES ('nacos', 'ROLE_ADMIN');
